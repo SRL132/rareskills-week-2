@@ -1,0 +1,15 @@
+[submodule "contracts/contract-1-smart-contract-ecosystem/lib/forge-std"]
+	path = contracts/contract-1-smart-contract-ecosystem/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "contracts/contract-1/lib/forge-std"]
+	path = contracts/contract-1/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "contracts/contract-1-smart-contract-ecosystem/lib/openzeppelin-contracts"]
+	path = contracts/contract-1-smart-contract-ecosystem/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "contracts/contract-2-nft-enumerable/lib/forge-std"]
+	path = contracts/contract-2-nft-enumerable/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "contracts/contract-2-nft-enumerable/lib/openzeppelin-contracts"]
+	path = contracts/contract-2-nft-enumerable/lib/openzeppelin-contracts
+	url = https://github.com/Openzeppelin/openzeppelin-contracts
