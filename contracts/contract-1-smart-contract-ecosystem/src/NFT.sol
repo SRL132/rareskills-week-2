@@ -11,6 +11,8 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
     error NFT__InvalidData();
     error NFT__AmountOverMaximum();
+    error NFT__NotEnoughMoney();
+    error NFT_WithdrawFailed();
 
     //STORAGE
 
@@ -51,9 +53,13 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
         return super.supportsInterface(_interfaceId);
     }
 
-    function mint(uint256 _index) external {
+    function mint(uint256 _index) external payable {
         if (_index >= MAX_SUPPLY) {
             revert NFT__AmountOverMaximum();
+        }
+
+        if (msg.value < REDUCED_PRICE) {
+            revert NFT__NotEnoughMoney();
         }
         _mint(msg.sender, _index);
     }
@@ -63,9 +69,12 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
         address account,
         uint256 amount,
         bytes32[] calldata proof
-    ) external {
+    ) external payable {
         if (index >= MAX_SUPPLY) {
             revert NFT__AmountOverMaximum();
+        }
+        if (msg.value < REDUCED_PRICE) {
+            revert NFT__NotEnoughMoney();
         }
         bytes32 node = keccak256(abi.encodePacked(index, account, amount));
         if (!MerkleProof.verify(proof, s_merkleRoot, node)) {
@@ -73,6 +82,15 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
         }
 
         _mint(msg.sender, index);
+    }
+
+    function withdraw() external onlyOwner {
+        uint256 balance = address(this).balance;
+        (bool success, ) = payable(msg.sender).call{value: balance}("");
+
+        if (!success) {
+            revert NFT_WithdrawFailed();
+        }
     }
 
     //PUBLIC
