@@ -4,10 +4,11 @@ pragma solidity 0.8.24;
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {Ownable, Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/utils/structs/Bitmaps.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 //Addresses in a merkle tree can mint NFTs at a discount. Use the bitmap methodology described above. Use openzeppelin’s bitmap, don’t implement it yourself.
-contract NFT is ERC165, ERC721, ERC2981 {
+contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
     error NFT__InvalidData();
     error NFT__AmountOverMaximum();
 
@@ -23,9 +24,21 @@ contract NFT is ERC165, ERC721, ERC2981 {
     BitMaps.BitMap private s_merkleRoots;
     bytes32 private immutable s_merkleRoot;
 
-    //FUNCTIONS
+    //OWNER
+    address s_pendingOwner;
 
-    constructor(bytes32 _merkleRoot) ERC721("MerkleNFT", "MNFT") {
+    //FUNCTIONS
+    modifier onlyPendingOwner() {
+        address sender = _msgSender();
+        if (s_pendingOwner != sender) {
+            revert OwnableUnauthorizedAccount(sender);
+        }
+        _;
+    }
+
+    constructor(
+        bytes32 _merkleRoot
+    ) ERC721("MerkleNFT", "MNFT") Ownable(msg.sender) {
         _setDefaultRoyalty(msg.sender, ROYALTY_REWARD_RATE);
         s_merkleRoot = _merkleRoot;
         BitMaps.set(s_merkleRoots, 0);
@@ -60,5 +73,26 @@ contract NFT is ERC165, ERC721, ERC2981 {
         }
 
         _mint(msg.sender, index);
+    }
+
+    //PUBLIC
+
+    function transferOwnership(
+        address _newOwner
+    ) public override(Ownable, Ownable2Step) onlyOwner {
+        s_pendingOwner = _newOwner;
+    }
+
+    function acceptOwnership() public override(Ownable2Step) onlyPendingOwner {
+        _transferOwnership(msg.sender);
+    }
+
+    //INTERNAL
+
+    function _transferOwnership(
+        address newOwner
+    ) internal override(Ownable, Ownable2Step) {
+        s_pendingOwner = address(0);
+        super._transferOwnership(newOwner);
     }
 }

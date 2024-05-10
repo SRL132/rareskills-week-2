@@ -2,7 +2,7 @@
 pragma solidity 0.8.24;
 import {IERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-
+//Create a new NFT collection with 20 items using ERC721Enumerable. The token ids should be [1..100] inclusive.
 contract EnumerableNFT is ERC721, IERC721Enumerable {
     error EnumerableNFT__OutOfBoundsIndex(uint256 index);
 

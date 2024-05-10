@@ -14,6 +14,7 @@ contract NFTTest is Test {
     uint256 public constant FIXED_SUPPLY = 1_000;
     address owner = makeAddr("OWNER");
     address user = makeAddr("USER");
+    address user2 = makeAddr("USER2");
     address merkleTreeUser = makeAddr("MERKLE_TREE_USER");
     bytes32 merkleRoot = keccak256("merkleRoot");
 
@@ -67,5 +68,29 @@ contract NFTTest is Test {
         nft.mintWithDiscount(0, merkleTreeUser, 1, proof);
         assertEq(nft.balanceOf(merkleTreeUser), 1);
         vm.stopPrank();
+    }
+
+    //OWNERSHIP TESTS
+
+    function testCanTransferOwnership() public {
+        vm.prank(owner);
+        nft.transferOwnership(user);
+        vm.prank(user);
+        nft.acceptOwnership();
+        assertEq(nft.owner(), user);
+    }
+
+    function testCannotTransferOwnershipIfNotOwner() public {
+        vm.prank(user);
+        vm.expectRevert();
+        nft.transferOwnership(user2);
+    }
+
+    function testCannotAcceptOwnershipIfNotPendingOwner() public {
+        vm.prank(owner);
+        nft.transferOwnership(user);
+        vm.prank(user2);
+        vm.expectRevert();
+        nft.acceptOwnership();
     }
 }
