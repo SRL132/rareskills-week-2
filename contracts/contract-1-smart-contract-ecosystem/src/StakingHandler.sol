@@ -31,7 +31,8 @@ contract StakingHandler is IERC721Receiver {
 
     function withdrawStakingRewards() external {
         // Implement this function
-        IERC721(i_nft).safeTransferFrom(msg.sender, address(0), 0);
+        _calculateStakingRewards();
+        IERC721(i_nft).safeTransferFrom(address(this), msg.sender, 0);
         erc20(i_royaltyToken).transfer(msg.sender, 0);
 
         emit StakingWithdrawn(msg.sender, 0);

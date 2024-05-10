@@ -84,9 +84,10 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
         _mint(msg.sender, index);
     }
 
-    function withdraw() external onlyOwner {
-        uint256 balance = address(this).balance;
-        (bool success, ) = payable(msg.sender).call{value: balance}("");
+    function withdrawFunds() external onlyOwner {
+        (bool success, ) = payable(msg.sender).call{
+            value: address(this).balance
+        }("");
 
         if (!success) {
             revert NFT_WithdrawFailed();
@@ -108,9 +109,9 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
     //INTERNAL
 
     function _transferOwnership(
-        address newOwner
+        address _newOwner
     ) internal override(Ownable, Ownable2Step) {
         s_pendingOwner = address(0);
-        super._transferOwnership(newOwner);
+        super._transferOwnership(_newOwner);
     }
 }

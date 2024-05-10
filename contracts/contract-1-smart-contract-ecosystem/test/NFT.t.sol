@@ -11,7 +11,7 @@ contract NFTTest is Test {
     RoyaltyToken public royaltyToken;
     StakingHandler public stakingHandler;
 
-    uint256 public constant FIXED_SUPPLY = 1_000;
+    uint256 public constant MAX_SUPPLY = 1_000;
     address owner = makeAddr("OWNER");
     address user = makeAddr("USER");
     address user2 = makeAddr("USER2");
@@ -27,29 +27,37 @@ contract NFTTest is Test {
             address(royaltyToken)
         );
         vm.stopPrank();
+        vm.deal(user, 500);
     }
 
     function testInitialSupply() public view {
         assertEq(nft.balanceOf(owner), 0);
     }
 
+    //MINT
     function testCanMint() public {
         vm.prank(user);
-        nft.mint(0);
+        nft.mint{value: 100}(0);
         assertEq(nft.balanceOf(user), 1);
+    }
+
+    function testCannotMintWithoutEnoughMoney() public {
+        vm.prank(user);
+        vm.expectRevert();
+        nft.mint{value: 10}(0);
     }
 
     function testCannotMintSameIndexTwice() public {
         vm.prank(user);
-        nft.mint(0);
+        nft.mint{value: 100}(0);
         vm.expectRevert();
-        nft.mint(0);
+        nft.mint{value: 100}(0);
     }
 
     function testCannotMintMoreThanMaxSupply() public {
         vm.prank(user);
         vm.expectRevert();
-        nft.mint(FIXED_SUPPLY);
+        nft.mint{value: 100}(MAX_SUPPLY);
     }
 
     function testCannotMintWithDiscountIfAddressNotInMerkleTree() public {
@@ -57,7 +65,7 @@ contract NFTTest is Test {
         bytes32[] memory proof = new bytes32[](1);
         proof[0] = bytes32(0);
         vm.expectRevert();
-        nft.mintWithDiscount(0, user, 1, proof);
+        nft.mintWithDiscount{value: 20}(0, user, 1, proof);
         vm.stopPrank();
     }
 
@@ -65,9 +73,28 @@ contract NFTTest is Test {
         vm.startPrank(merkleTreeUser);
         bytes32[] memory proof = new bytes32[](1);
         proof[0] = bytes32(0);
-        nft.mintWithDiscount(0, merkleTreeUser, 1, proof);
+        nft.mintWithDiscount{value: 20}(0, merkleTreeUser, 1, proof);
         assertEq(nft.balanceOf(merkleTreeUser), 1);
         vm.stopPrank();
+    }
+
+    function testCannotMintWithDiscountIfNotEnoughMoney() public {
+        vm.startPrank(merkleTreeUser);
+        bytes32[] memory proof = new bytes32[](1);
+        proof[0] = bytes32(0);
+        vm.expectRevert();
+        nft.mintWithDiscount{value: 10}(0, merkleTreeUser, 1, proof);
+        vm.stopPrank();
+    }
+
+    //WITHDRAW
+    function testOnlyOwnerCanWithdrawFunds() public {
+        vm.prank(user);
+        nft.mint{value: 100}(0);
+        vm.expectRevert();
+        nft.withdrawFunds();
+        vm.prank(owner);
+        nft.withdrawFunds();
     }
 
     //OWNERSHIP TESTS
