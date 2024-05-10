@@ -69,27 +69,27 @@ contract NFTTest is Test {
     //MINT
     function testCanMint() public {
         vm.prank(user);
-        nft.mint{value: 100}(MOCK_TOKEN_ID);
+        nft.buy{value: 100}(MOCK_TOKEN_ID);
         assertEq(nft.balanceOf(user), 1);
     }
 
     function testCannotMintWithoutEnoughMoney() public {
         vm.prank(user);
         vm.expectRevert();
-        nft.mint{value: 10}(MOCK_TOKEN_ID);
+        nft.buy{value: 10}(MOCK_TOKEN_ID);
     }
 
     function testCannotMintSameIndexTwice() public {
         vm.prank(user);
-        nft.mint{value: 100}(MOCK_TOKEN_ID);
+        nft.buy{value: 100}(MOCK_TOKEN_ID);
         vm.expectRevert();
-        nft.mint{value: 100}(MOCK_TOKEN_ID);
+        nft.buy{value: 100}(MOCK_TOKEN_ID);
     }
 
     function testCannotMintMoreThanMaxSupply() public {
         vm.prank(user);
         vm.expectRevert();
-        nft.mint{value: 100}(MAX_SUPPLY);
+        nft.buy{value: 100}(MAX_SUPPLY);
     }
 
     function testCannotMintWithDiscountIfAddressNotInMerkleTree(
@@ -99,7 +99,7 @@ contract NFTTest is Test {
         proof[0] = leafs[1];
         proof[1] = layer2[1];
         vm.expectRevert();
-        nft.mintWithDiscount{value: 20}(0, 1, proof);
+        nft.buyWithDiscount{value: 20}(0, 1, proof);
         vm.stopPrank();
     }
 
@@ -107,7 +107,7 @@ contract NFTTest is Test {
         vm.startPrank(user1);
         proof[0] = leafs[1];
         proof[1] = layer2[1];
-        nft.mintWithDiscount{value: 20}(MOCK_TOKEN_ID, 1, proof);
+        nft.buyWithDiscount{value: 20}(MOCK_TOKEN_ID, 1, proof);
         assertEq(nft.balanceOf(user1), 1);
         vm.stopPrank();
     }
@@ -118,14 +118,14 @@ contract NFTTest is Test {
         proof[1] = layer2[1];
         proof[0] = bytes32(0);
         vm.expectRevert();
-        nft.mintWithDiscount{value: 10}(MOCK_TOKEN_ID, 1, proof);
+        nft.buyWithDiscount{value: 10}(MOCK_TOKEN_ID, 1, proof);
         vm.stopPrank();
     }
 
     //WITHDRAW
     function testOnlyOwnerCanWithdrawFunds() public {
         vm.prank(user);
-        nft.mint{value: 100}(MOCK_TOKEN_ID);
+        nft.buy{value: 100}(MOCK_TOKEN_ID);
         vm.expectRevert();
         nft.withdrawFunds();
         vm.prank(owner);

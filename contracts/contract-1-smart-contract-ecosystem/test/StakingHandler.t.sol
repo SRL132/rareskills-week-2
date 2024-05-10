@@ -37,14 +37,14 @@ contract StakingHandlerTest is Test {
     //MINT
     function testCanReceiveNFT() public {
         vm.startPrank(user);
-        nft.mint{value: 100}(0);
+        nft.buy{value: 100}(0);
         nft.transferFrom(user, address(stakingHandler), 0);
         vm.stopPrank();
     }
 
     function testCanWithdrawStakingRewards() public {
         vm.startPrank(user);
-        nft.mint{value: 100}(0);
+        nft.buy{value: 100}(0);
         nft.transferFrom(user, address(stakingHandler), 0);
         stakingHandler.withdrawStakingRewards();
         vm.stopPrank();
