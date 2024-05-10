@@ -9,6 +9,8 @@ import "@openzeppelin/contracts/utils/structs/Bitmaps.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 //Addresses in a merkle tree can mint NFTs at a discount. Use the bitmap methodology described above. Use openzeppelin’s bitmap, don’t implement it yourself.
 contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
+    using BitMaps for BitMaps.BitMap;
+
     error NFT__InvalidData();
     error NFT__AmountOverMaximum();
     error NFT__NotEnoughMoney();
@@ -25,8 +27,18 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
     //MERKLE TREE
     bytes32 private immutable s_merkleRoot;
 
+    //BITMAP
+    BitMaps.BitMap private s_balances;
+
     //OWNER
     address s_pendingOwner;
+
+    //EVENTS
+    event MintedWithDiscount(
+        address indexed user,
+        uint256 indexed index,
+        uint256 amount
+    );
 
     //FUNCTIONS
     modifier onlyPendingOwner() {
@@ -59,12 +71,12 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
         if (msg.value < REDUCED_PRICE) {
             revert NFT__NotEnoughMoney();
         }
+        s_balances.setTo(_index, true);
         _mint(msg.sender, _index);
     }
 
     function mintWithDiscount(
         uint256 index,
-        address account,
         uint256 amount,
         bytes32[] calldata _proof
     ) external payable {
@@ -83,8 +95,9 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
         ) {
             revert NFT__InvalidData();
         }
-
+        s_balances.setTo(index, true);
         _mint(msg.sender, index);
+        emit MintedWithDiscount(msg.sender, index, amount);
     }
 
     function withdrawFunds() external onlyOwner {
