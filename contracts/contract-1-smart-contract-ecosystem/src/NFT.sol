@@ -12,7 +12,7 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
     error NFT__InvalidData();
     error NFT__AmountOverMaximum();
     error NFT__NotEnoughMoney();
-    error NFT_WithdrawFailed();
+    error NFT__WithdrawFailed();
 
     //STORAGE
 
@@ -23,7 +23,6 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
     uint40 public constant REGULAR_PRICE = 100;
 
     //MERKLE TREE
-    BitMaps.BitMap private s_merkleRoots;
     bytes32 private immutable s_merkleRoot;
 
     //OWNER
@@ -43,7 +42,6 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
     ) ERC721("MerkleNFT", "MNFT") Ownable(msg.sender) {
         _setDefaultRoyalty(msg.sender, ROYALTY_REWARD_RATE);
         s_merkleRoot = _merkleRoot;
-        BitMaps.set(s_merkleRoots, 0);
     }
 
     //EXTERNAL
@@ -68,7 +66,7 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
         uint256 index,
         address account,
         uint256 amount,
-        bytes32[] calldata proof
+        bytes32[] calldata _proof
     ) external payable {
         if (index >= MAX_SUPPLY) {
             revert NFT__AmountOverMaximum();
@@ -76,8 +74,13 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
         if (msg.value < REDUCED_PRICE) {
             revert NFT__NotEnoughMoney();
         }
-        bytes32 node = keccak256(abi.encodePacked(index, account, amount));
-        if (!MerkleProof.verify(proof, s_merkleRoot, node)) {
+        if (
+            !MerkleProof.verify(
+                _proof,
+                s_merkleRoot,
+                keccak256(abi.encodePacked(msg.sender))
+            )
+        ) {
             revert NFT__InvalidData();
         }
 
@@ -90,7 +93,7 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
         }("");
 
         if (!success) {
-            revert NFT_WithdrawFailed();
+            revert NFT__WithdrawFailed();
         }
     }
 
