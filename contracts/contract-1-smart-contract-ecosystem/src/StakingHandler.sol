@@ -93,7 +93,7 @@ contract StakingHandler is IERC721Receiver {
             revert StakingHandler__WrongNFT();
         }
 
-        _updatePool(true);
+        _updateRewards(true);
         unchecked {
             ++s_userToUserInfo[_operator].amount;
         }
@@ -112,7 +112,7 @@ contract StakingHandler is IERC721Receiver {
     /// @notice Withdraws the staking rewards for the sender
     /// @dev Withdraws the corresponding minted ERC20 minted tokens for the sender
     function withdrawStakingRewards() external {
-        _updatePool(false);
+        _updateRewards(false);
         if (s_userToUserInfo[msg.sender].amount == 0) {
             revert StakingHandler__ZeroAmountStaked();
         }
@@ -160,9 +160,9 @@ contract StakingHandler is IERC721Receiver {
 
     //INTERNAL FUNCTIONS
 
-    /// @dev Updates the pool by minting new reward tokens and updating storage variables accordingly
+    /// @dev Updates the rewards by minting new reward tokens and updating storage variables accordingly
     /// @param _isDeposit A boolean that indicates if the update is due to a deposit or not
-    function _updatePool(bool _isDeposit) internal {
+    function _updateRewards(bool _isDeposit) internal {
         if (block.number <= s_lastRewardBlock) {
             return;
         }
