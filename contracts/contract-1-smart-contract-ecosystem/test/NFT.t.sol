@@ -3,14 +3,17 @@ pragma solidity 0.8.24;
 
 import {Test, console} from "forge-std/Test.sol";
 import {NFT} from "../src/NFT.sol";
-import {RoyaltyToken} from "../src/RoyaltyToken.sol";
+import {RewardToken} from "../src/RewardToken.sol";
 import {StakingHandler} from "../src/StakingHandler.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/utils/Create2.sol";
 
 contract NFTTest is Test {
+    using Create2 for bytes32;
+
     //CONTRACTS
     NFT public nft;
-    RoyaltyToken public royaltyToken;
+    RewardToken public rewardToken;
     StakingHandler public stakingHandler;
 
     //MERKLE TREE
@@ -19,6 +22,7 @@ contract NFTTest is Test {
     bytes32[] public layer2;
     bytes32[] public proof;
     address proofAddress = user1;
+    uint256 public constant AMOUNT_PROMISED = 3;
 
     //DISCOUNT USERS
     address user1 = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2;
@@ -29,8 +33,10 @@ contract NFTTest is Test {
     //MOCK VARS
     address owner = makeAddr("OWNER");
     address user = makeAddr("USER");
+    address artist = makeAddr("ARTIST");
     uint256 public constant MAX_SUPPLY = 1_000;
     uint256 MOCK_TOKEN_ID = 0;
+    uint256 public constant EXPECTED_ROYALTY = 2;
 
     function setUp() public {
         address[] memory usersWithDiscount = new address[](4);
@@ -50,13 +56,13 @@ contract NFTTest is Test {
         root = keccak256(abi.encodePacked(layer2[1], layer2[0]));
 
         proof = [leafs[1], layer2[1]];
+
         vm.startPrank(owner);
-        nft = new NFT(root);
-        royaltyToken = new RoyaltyToken(address(nft));
-        stakingHandler = new StakingHandler(
-            address(nft),
-            address(royaltyToken)
-        );
+        nft = new NFT(root, artist);
+        rewardToken = new RewardToken();
+        stakingHandler = new StakingHandler(address(nft), address(rewardToken));
+        rewardToken.setStakingHandler(address(stakingHandler));
+        nft.setStakingHandler(address(stakingHandler));
         vm.stopPrank();
         vm.deal(user, 500);
         vm.deal(user1, 500);
@@ -66,7 +72,6 @@ contract NFTTest is Test {
         assertEq(nft.balanceOf(owner), 0);
     }
 
-    //MINT
     function testCanMint() public {
         vm.prank(user);
         nft.buy{value: 100}(MOCK_TOKEN_ID);
@@ -86,24 +91,17 @@ contract NFTTest is Test {
         nft.buy{value: 100}(MOCK_TOKEN_ID);
     }
 
-    function testCannotMintMoreThanMaxSupply() public {
-        vm.prank(user);
-        vm.expectRevert();
-        nft.buy{value: 100}(MAX_SUPPLY);
-    }
-
-    function testCannotMintWithDiscountIfAddressNotInMerkleTree(
+    function testCannotWithDiscountIfAddressNotInMerkleTree(
         address _user
     ) public {
-        vm.startPrank(_user);
+        vm.prank(_user);
         proof[0] = leafs[1];
         proof[1] = layer2[1];
         vm.expectRevert();
         nft.buyWithDiscount{value: 20}(0, 1, proof);
-        vm.stopPrank();
     }
 
-    function testCanMintWithDiscountIfAddressInMerkleTree() public {
+    function testCanBuyWithDiscountIfAddressInMerkleTree() public {
         vm.startPrank(user1);
         proof[0] = leafs[1];
         proof[1] = layer2[1];
@@ -112,13 +110,55 @@ contract NFTTest is Test {
         vm.stopPrank();
     }
 
-    function testCannotMintWithDiscountIfNotEnoughMoney() public {
+    function testCannotBuyWithDiscountIfSameIndexTwice() public {
+        vm.startPrank(user1);
+        proof[0] = leafs[1];
+        proof[1] = layer2[1];
+        nft.buyWithDiscount{value: 20}(MOCK_TOKEN_ID, 1, proof);
+        vm.expectRevert();
+        nft.buyWithDiscount{value: 20}(MOCK_TOKEN_ID + 1, 1, proof);
+        assertEq(nft.balanceOf(user1), 1);
+        vm.stopPrank();
+    }
+
+    function testCannotBuyWithDiscountIfIndexTooLarge() public {
+        vm.startPrank(user1);
+        proof[0] = leafs[1];
+        proof[1] = layer2[1];
+        nft.buyWithDiscount{value: 20}(MOCK_TOKEN_ID, 1, proof);
+        vm.expectRevert();
+        nft.buyWithDiscount{value: 20}(MOCK_TOKEN_ID + 1, 4, proof);
+        assertEq(nft.balanceOf(user1), 1);
+        vm.stopPrank();
+    }
+
+    function testCannotBuyWithDiscountIfNotEnoughMoney() public {
         vm.startPrank(user1);
         proof[0] = leafs[1];
         proof[1] = layer2[1];
         proof[0] = bytes32(0);
         vm.expectRevert();
         nft.buyWithDiscount{value: 10}(MOCK_TOKEN_ID, 1, proof);
+        vm.stopPrank();
+    }
+
+    function testCanBuyAndStake() public {
+        vm.prank(user);
+        nft.buyAndStake{value: 100}(MOCK_TOKEN_ID);
+        assertEq(nft.balanceOf(user), 0);
+        uint256[] memory stakedTokens = stakingHandler.getStakedTokens(user);
+        assertEq(stakedTokens.length, 1);
+    }
+
+    function testCanBuyAndStakeWithDiscount() public {
+        vm.deal(user1, 500);
+        vm.startPrank(user1);
+        proof[0] = leafs[1];
+        proof[1] = layer2[1];
+        nft.buyWithDiscountAndStake{value: 20}(MOCK_TOKEN_ID, 1, proof);
+        assertEq(nft.balanceOf(user1), 0);
+        uint256[] memory stakedTokens = stakingHandler.getStakedTokens(user1);
+        assertEq(stakedTokens.length, 1);
         vm.stopPrank();
     }
 
@@ -153,5 +193,19 @@ contract NFTTest is Test {
         vm.prank(user2);
         vm.expectRevert();
         nft.acceptOwnership();
+    }
+
+    //ROYALTY
+
+    function testGetRoyaltyInfo() public {
+        vm.prank(user);
+        nft.buy{value: 100}(MOCK_TOKEN_ID);
+        nft.royaltyInfo(MOCK_TOKEN_ID, 100);
+        (address receiver, uint256 royalty) = nft.royaltyInfo(
+            MOCK_TOKEN_ID,
+            100
+        );
+        assertEq(receiver, artist);
+        assertEq(royalty, EXPECTED_ROYALTY);
     }
 }
