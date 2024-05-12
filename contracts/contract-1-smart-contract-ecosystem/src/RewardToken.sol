@@ -14,11 +14,11 @@ contract RewardToken is ERC20 {
         i_owner = msg.sender;
     }
 
-    function mint(address to, uint256 amount) external {
+    function mint(address _to, uint256 _amount) external {
         if (msg.sender != s_stakingHandler) {
             revert RewardToken__OnlyStakingHandlerCanMint();
         }
-        _mint(to, amount);
+        _mint(_to, _amount);
     }
 
     function setStakingHandler(address _stakingHandler) external {

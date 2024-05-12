@@ -7,7 +7,6 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IRewardToken} from "./interfaces/IRewardToken.sol";
 
-//TODO: Implement the staking rewards algorithm with rewards proportional to how many users were on each
 contract StakingHandler is IERC721Receiver {
     using SafeERC20 for IERC20;
 
@@ -63,10 +62,10 @@ contract StakingHandler is IERC721Receiver {
 
     //EXTERNAL FUNCTIONS
     function onERC721Received(
-        address operator,
-        address from,
-        uint256 tokenId,
-        bytes calldata data
+        address _operator,
+        address _from,
+        uint256 _tokenId,
+        bytes calldata _data
     ) external override returns (bytes4) {
         if (msg.sender != i_nft) {
             revert StakingHandler__WrongNFT();
@@ -74,17 +73,17 @@ contract StakingHandler is IERC721Receiver {
 
         _updatePool(true);
         unchecked {
-            ++s_userToUserInfo[operator].amount;
+            ++s_userToUserInfo[_operator].amount;
         }
-        s_userToUserInfo[operator].rewardDebt += s_accRewardPerToken;
-        s_userToTokenToStakingState[operator][tokenId] = StakingState(
+        s_userToUserInfo[_operator].rewardDebt += s_accRewardPerToken;
+        s_userToTokenToStakingState[_operator][_tokenId] = StakingState(
             block.number,
             s_accRewardPerToken
         );
-        ///LEGACY?
-        s_userToStakedTokens[operator].push(tokenId);
-        ///LEGACY-END
-        emit NFTStaked(operator, tokenId, block.number);
+
+        s_userToStakedTokens[_operator].push(_tokenId);
+
+        emit NFTStaked(_operator, _tokenId, block.number);
         return this.onERC721Received.selector;
     }
 
@@ -104,6 +103,9 @@ contract StakingHandler is IERC721Receiver {
     }
 
     function withdrawNFT() external {
+        if (s_userToUserInfo[msg.sender].amount == 0) {
+            revert StakingHandler__ZeroAmountStaked();
+        }
         _updatePool(false);
         IRewardToken(i_rewardToken).mint(address(this), 10);
         IERC721(i_nft).safeTransferFrom(address(this), msg.sender, 0);
