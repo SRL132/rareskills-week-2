@@ -23,16 +23,23 @@ contract NFTInfo {
     /// @param _account The address of the user whose owned NFT IDs will be retrieved from
     /// @return The total number of tokens owned by the user which have prime numbers as ID
     function primeBalanceOf(address _account) external view returns (uint256) {
-        uint256[] memory ownedTokens = EnumerableNFT(i_nft).getOwnedTokens(
-            _account
-        );
-        uint256 balance = 0;
-        for (uint256 i = 0; i < ownedTokens.length; i++) {
-            if (_isPrimeNumber(ownedTokens[i])) {
-                balance++;
-            }
+        unchecked {
+            uint256[] memory ownedTokens = EnumerableNFT(i_nft).getOwnedTokens(
+                _account
+            );
+            uint256 ownedTokensLength = ownedTokens.length;
+            uint256 balance = 0;
+            uint256 i = 0;
+
+            do {
+                if (_isPrimeNumber(ownedTokens[i])) {
+                    ++balance;
+                }
+                ++i;
+            } while (i < ownedTokensLength);
+
+            return balance;
         }
-        return balance;
     }
 
     /// @notice Helper function to check if a number is prime
@@ -40,14 +47,16 @@ contract NFTInfo {
     /// @param _number The number to check if it is prime
     /// @return True if the number is prime, false otherwise
     function _isPrimeNumber(uint256 _number) internal pure returns (bool) {
-        if (_number < 2) {
-            return false;
-        }
-        for (uint256 i = 2; i * i <= _number; i++) {
-            if (_number % i == 0) {
+        unchecked {
+            if (_number < 2) {
                 return false;
             }
+            for (uint256 i = 2; i * i <= _number; ++i) {
+                if (_number % i == 0) {
+                    return false;
+                }
+            }
+            return true;
         }
-        return true;
     }
 }
