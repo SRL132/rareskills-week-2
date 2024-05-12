@@ -51,11 +51,23 @@ contract NFTInfo {
             if (_number < 2) {
                 return false;
             }
-            for (uint256 i = 2; i * i <= _number; ++i) {
-                if (_number % i == 0) {
+
+            if (_number == 2 || _number == 3) {
+                return true;
+            }
+
+            if (_number % 2 == 0 || _number % 3 == 0) {
+                return false;
+            }
+
+            uint256 i = 5;
+            while (i * i <= _number) {
+                if (_number % i == 0 || _number % (i + 2) == 0) {
                     return false;
                 }
+                i += 6;
             }
+
             return true;
         }
     }

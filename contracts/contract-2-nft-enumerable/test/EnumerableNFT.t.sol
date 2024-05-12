@@ -12,6 +12,8 @@ contract EnumerableNFTTest is Test {
     address owner = makeAddr("OWNER");
     address user = makeAddr("USER");
 
+    uint256 public constant PRIME_NUMBERS_BETWEEN_1_AND_20 = 8;
+
     function setUp() public {
         vm.startPrank(owner);
         enumerableNFT = new EnumerableNFT();
@@ -64,7 +66,7 @@ contract EnumerableNFTTest is Test {
         enumerableNFT.mint(user, 19);
         enumerableNFT.mint(user, 20);
         vm.stopPrank();
-        assertEq(nftInfo.primeBalanceOf(user), 8);
+        assertEq(nftInfo.primeBalanceOf(user), PRIME_NUMBERS_BETWEEN_1_AND_20);
     }
 
     function testCanGetPrimeBalanceWithNoPrimes() public {
@@ -83,5 +85,31 @@ contract EnumerableNFTTest is Test {
         enumerableNFT.mint(user, 20);
         vm.stopPrank();
         assertEq(nftInfo.primeBalanceOf(user), 0);
+    }
+
+    function testCanGetPrimeBalanceTenToTen() public {
+        vm.startPrank(user);
+        enumerableNFT.mint(user, 10);
+        enumerableNFT.mint(user, 20);
+        enumerableNFT.mint(user, 30);
+        enumerableNFT.mint(user, 40);
+        enumerableNFT.mint(user, 50);
+        enumerableNFT.mint(user, 60);
+        enumerableNFT.mint(user, 70);
+        enumerableNFT.mint(user, 80);
+        enumerableNFT.mint(user, 90);
+        enumerableNFT.mint(user, 100);
+        enumerableNFT.mint(user, 15);
+        enumerableNFT.mint(user, 25);
+        enumerableNFT.mint(user, 35);
+        enumerableNFT.mint(user, 45);
+        enumerableNFT.mint(user, 55);
+        enumerableNFT.mint(user, 65);
+        enumerableNFT.mint(user, 75);
+        enumerableNFT.mint(user, 85);
+        enumerableNFT.mint(user, 97);
+        enumerableNFT.mint(user, 68);
+        vm.stopPrank();
+        assertEq(nftInfo.primeBalanceOf(user), 1);
     }
 }
