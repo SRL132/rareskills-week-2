@@ -3,15 +3,16 @@ pragma solidity 0.8.24;
 
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IRewardToken} from "./interfaces/IRewardToken.sol";
 
-//24 hours = 86400 seconds
-//10 erc20 per day if 1 token staked
-//1 erc20 per day if
 //TODO: Implement the staking rewards algorithm with rewards proportional to how many users were on each
 contract StakingHandler is IERC721Receiver {
+    using SafeERC20 for IERC20;
+
     error StakingHandler__WrongNFT();
+    error StakingHandler__ZeroAmountStaked();
 
     //STORAGE
     address immutable i_nft;
@@ -20,7 +21,10 @@ contract StakingHandler is IERC721Receiver {
     //REWARD CONFIG
     uint256 public constant STAKING_REWARD = 10;
     uint256 public constant STAKING_REWARD_PERIOD = 1 days;
-    uint256 public constant REWARDS_PER_DAY = 10;
+    uint256 public constant BLOCKS_IN_A_DAY = 7200;
+
+    uint256 s_lastRewardBlock = block.number;
+    uint256 s_accRewardPerToken;
 
     //EVENTS
     event StakingWithdrawn(
@@ -28,20 +32,28 @@ contract StakingHandler is IERC721Receiver {
         uint256 amount,
         uint256 timestamp
     );
+
     event NFTStaked(address indexed user, uint256 tokenId, uint256 timestamp);
+    event TestWithdrawCalculationsInUpdate(uint256 accRewardPerToken);
+    event TestTokenSupplyStaked(uint256 tokenSupplyStaked);
 
     //STAKING
     mapping(address user => mapping(uint256 tokenId => StakingState))
         public s_userToTokenToStakingState;
 
-    mapping(uint256 blockNumber => uint256[] tokenIds)
-        public s_stakedTokensPerBlock;
-
     mapping(address user => uint256[] tokenIds) public s_userToStakedTokens;
+
+    mapping(address user => UserInfo) public s_userToUserInfo;
 
     //STRUCTS
     struct StakingState {
         uint256 startedBlock;
+        uint256 startingAccRewardPerToken;
+    }
+
+    struct UserInfo {
+        uint256 amount;
+        uint256 rewardDebt;
     }
 
     constructor(address _nft, address _rewardToken) {
@@ -60,41 +72,83 @@ contract StakingHandler is IERC721Receiver {
             revert StakingHandler__WrongNFT();
         }
 
+        _updatePool(true);
+        unchecked {
+            ++s_userToUserInfo[operator].amount;
+        }
+        s_userToUserInfo[operator].rewardDebt += s_accRewardPerToken;
         s_userToTokenToStakingState[operator][tokenId] = StakingState(
-            block.number
+            block.number,
+            s_accRewardPerToken
         );
-
-        s_stakedTokensPerBlock[block.number].push(tokenId);
+        ///LEGACY?
         s_userToStakedTokens[operator].push(tokenId);
+        ///LEGACY-END
         emit NFTStaked(operator, tokenId, block.number);
         return this.onERC721Received.selector;
     }
 
     function withdrawStakingRewards() external {
+        _updatePool(false);
+        if (s_userToUserInfo[msg.sender].amount == 0) {
+            revert StakingHandler__ZeroAmountStaked();
+        }
+        uint256 withdrawableAmount = s_accRewardPerToken -
+            s_userToUserInfo[msg.sender].rewardDebt;
+
+        s_userToUserInfo[msg.sender].rewardDebt = s_accRewardPerToken;
+        --s_userToUserInfo[msg.sender].amount;
+        IERC20(i_rewardToken).safeTransfer(msg.sender, withdrawableAmount);
+
+        emit StakingWithdrawn(msg.sender, withdrawableAmount, block.number);
+    }
+
+    function withdrawNFT() external {
+        _updatePool(false);
         IRewardToken(i_rewardToken).mint(address(this), 10);
         IERC721(i_nft).safeTransferFrom(address(this), msg.sender, 0);
-        //   IRewardToken(i_rewardToken).transfer(msg.sender, 10);
 
         emit StakingWithdrawn(msg.sender, 0, block.number);
     }
 
-    function withdrawStakingRewardsAndNFT(uint256[] memory _tokenIds) external {
-        IRewardToken(i_rewardToken).mint(address(this), 10);
-        IERC721(i_nft).safeTransferFrom(address(this), msg.sender, 0);
-        //   IRewardToken(i_rewardToken).transfer(msg.sender, 10);
-
-        emit StakingWithdrawn(msg.sender, 0, block.number);
-    }
-
-    // HELPER FUNCTIONS
-    function _calculateStakingRewards() internal view returns (uint256) {
-        // Implement this function
-        return 0;
-    }
     //VIEW FUNCTIONS
     function getStakedTokens(
         address _user
     ) external view returns (uint256[] memory) {
         return s_userToStakedTokens[_user];
+    }
+
+    //INTERNAL FUNCTIONS
+    function _updatePool(bool _isDeposit) internal {
+        if (block.number <= s_lastRewardBlock) {
+            return;
+        }
+
+        uint256 tokenSupplyStaked = IERC721(i_nft).balanceOf(address(this));
+
+        emit TestTokenSupplyStaked(tokenSupplyStaked);
+
+        if (tokenSupplyStaked == 0) {
+            s_lastRewardBlock = block.number;
+            return;
+        }
+        if (s_lastRewardBlock == 0) {
+            s_lastRewardBlock = block.number;
+            return;
+        }
+
+        uint256 rewardToMint = ((block.number - s_lastRewardBlock) *
+            STAKING_REWARD) / BLOCKS_IN_A_DAY;
+
+        if (_isDeposit) {
+            --tokenSupplyStaked;
+        }
+
+        s_accRewardPerToken += rewardToMint / tokenSupplyStaked;
+        if (tokenSupplyStaked > 0) {
+            emit TestWithdrawCalculationsInUpdate(s_accRewardPerToken);
+        }
+        IRewardToken(i_rewardToken).mint(address(this), rewardToMint);
+        s_lastRewardBlock = block.number;
     }
 }

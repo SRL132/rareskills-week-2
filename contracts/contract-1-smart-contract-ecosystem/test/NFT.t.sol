@@ -72,26 +72,26 @@ contract NFTTest is Test {
         assertEq(nft.balanceOf(owner), 0);
     }
 
-    function testCanMint() public {
+    function testCanBuy() public {
         vm.prank(user);
         nft.buy{value: 100}(MOCK_TOKEN_ID);
         assertEq(nft.balanceOf(user), 1);
     }
 
-    function testCannotMintWithoutEnoughMoney() public {
+    function testCannotBuyWithoutEnoughMoney() public {
         vm.prank(user);
         vm.expectRevert();
         nft.buy{value: 10}(MOCK_TOKEN_ID);
     }
 
-    function testCannotMintSameIndexTwice() public {
+    function testCannotBuySameIndexTwice() public {
         vm.prank(user);
         nft.buy{value: 100}(MOCK_TOKEN_ID);
         vm.expectRevert();
         nft.buy{value: 100}(MOCK_TOKEN_ID);
     }
 
-    function testCannotWithDiscountIfAddressNotInMerkleTree(
+    function testCannotBuyWithDiscountIfAddressNotInMerkleTree(
         address _user
     ) public {
         vm.prank(_user);

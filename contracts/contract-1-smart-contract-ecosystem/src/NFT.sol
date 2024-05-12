@@ -53,7 +53,6 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
     address s_stakingHandler;
 
     //ROYALTIES
-    RoyaltyInfo private s_royalties;
     uint256 private constant ROYALTEE_FEE_DENOMINATOR = 10_000;
     uint256 private constant ROYALTIES_FEE_PRECISION = 10e18;
 

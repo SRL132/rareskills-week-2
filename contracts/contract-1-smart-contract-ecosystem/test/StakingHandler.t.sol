@@ -12,6 +12,7 @@ contract StakingHandlerTest is Test {
     StakingHandler public stakingHandler;
 
     uint256 public constant MAX_SUPPLY = 1_000;
+    uint256 public constant BLOCKS_IN_A_DAY = 7200;
     address owner = makeAddr("OWNER");
     address user = makeAddr("USER");
     address user2 = makeAddr("USER2");
@@ -28,6 +29,7 @@ contract StakingHandlerTest is Test {
 
         vm.stopPrank();
         vm.deal(user, 500);
+        vm.deal(user2, 500);
     }
 
     function testInitialSupply() public view {
@@ -46,9 +48,56 @@ contract StakingHandlerTest is Test {
     function testCanWithdrawStakingRewards() public {
         vm.startPrank(user);
         nft.buy{value: 100}(0);
-        nft.transferFrom(user, address(stakingHandler), 0);
+        nft.safeTransferFrom(user, address(stakingHandler), 0);
+        vm.roll(block.number + BLOCKS_IN_A_DAY);
         stakingHandler.withdrawStakingRewards();
         vm.stopPrank();
+        assertEq(rewardToken.balanceOf(user), 10);
+    }
+
+    function testCanWithdrawProportionalRewardsIfMultipleUsersSameBlock()
+        public
+    {
+        vm.startPrank(user);
+        nft.buy{value: 100}(0);
+        nft.safeTransferFrom(user, address(stakingHandler), 0);
+        vm.stopPrank();
+        vm.startPrank(user2);
+        nft.buy{value: 100}(1);
+        nft.safeTransferFrom(user2, address(stakingHandler), 1);
+        vm.stopPrank();
+        vm.roll(block.number + BLOCKS_IN_A_DAY);
+        vm.prank(user);
+        stakingHandler.withdrawStakingRewards();
+        vm.prank(user2);
+        stakingHandler.withdrawStakingRewards();
+
+        assertEq(rewardToken.totalSupply(), 10);
+        assertEq(rewardToken.balanceOf(user), 5);
+        assertEq(rewardToken.balanceOf(user2), 5);
+    }
+
+    function testCanWithdrawProportionalRewardsIfMultipleUsersDifferentBlocks()
+        public
+    {
+        vm.startPrank(user);
+        nft.buy{value: 100}(0);
+        nft.safeTransferFrom(user, address(stakingHandler), 0);
+        vm.stopPrank();
+        vm.roll(block.number + BLOCKS_IN_A_DAY);
+        vm.startPrank(user2);
+        nft.buy{value: 100}(1);
+        nft.safeTransferFrom(user2, address(stakingHandler), 1);
+        vm.stopPrank();
+        vm.roll(block.number + BLOCKS_IN_A_DAY);
+        vm.prank(user);
+        stakingHandler.withdrawStakingRewards();
+        vm.prank(user2);
+        stakingHandler.withdrawStakingRewards();
+
+        assertEq(rewardToken.totalSupply(), 20);
+        assertEq(rewardToken.balanceOf(user), 15);
+        assertEq(rewardToken.balanceOf(user2), 5);
     }
 
     function testGetStakedTokens() public {
