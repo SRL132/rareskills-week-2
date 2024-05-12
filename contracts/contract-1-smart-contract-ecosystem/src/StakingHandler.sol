@@ -7,6 +7,10 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IRewardToken} from "./interfaces/IRewardToken.sol";
 
+/// @title A contract that handles staking of NFTs and rewards users with a reward token
+/// @author Sergi Roca Laguna
+/// @notice This contract allows users to stake NFTs and receive rewards in a reward token
+/// @dev This contract inherits from IERC721Receiver
 contract StakingHandler is IERC721Receiver {
     using SafeERC20 for IERC20;
 
@@ -55,12 +59,24 @@ contract StakingHandler is IERC721Receiver {
         uint256 rewardDebt;
     }
 
+    /// @notice Initializes the contract with the NFT and reward token addresses
+    /// @dev Initializes the contract with the NFT and reward token addresses
+    /// @param _nft The address of the NFT contract
+    /// @param _rewardToken The address of the reward token contract
     constructor(address _nft, address _rewardToken) {
         i_nft = _nft;
         i_rewardToken = _rewardToken;
     }
 
     //EXTERNAL FUNCTIONS
+
+    /// @notice Receives an NFT and stakes it for the sender
+    /// @dev Receives an NFT and stakes it for the sender
+    /// @param _operator The address of the user that sent the NFT
+    /// @param _from The address of the user that sent the NFT
+    /// @param _tokenId The ID of the NFT that was sent
+    /// @param _data Additional data sent with the NFT
+    /// @return The ERC721Received selector
     function onERC721Received(
         address _operator,
         address _from,
@@ -87,6 +103,8 @@ contract StakingHandler is IERC721Receiver {
         return this.onERC721Received.selector;
     }
 
+    /// @notice Withdraws the staking rewards for the sender
+    /// @dev Withdraws the corresponding minted ERC20 minted tokens for the sender
     function withdrawStakingRewards() external {
         _updatePool(false);
         if (s_userToUserInfo[msg.sender].amount == 0) {
@@ -102,6 +120,8 @@ contract StakingHandler is IERC721Receiver {
         emit StakingWithdrawn(msg.sender, withdrawableAmount, block.number);
     }
 
+    /// @notice Withdraws the NFT staked by the sender
+    /// @dev Withdraws the NFT staked by the sender
     function withdrawNFT() external {
         if (s_userToUserInfo[msg.sender].amount == 0) {
             revert StakingHandler__ZeroAmountStaked();
@@ -114,6 +134,11 @@ contract StakingHandler is IERC721Receiver {
     }
 
     //VIEW FUNCTIONS
+
+    /// @notice Retrieves the staked tokens of a given user
+    /// @dev Retrieves the staked tokens of a given user address
+    /// @param _user The address of the user whose staked tokens will be retrieved
+    /// @return An array of token IDs representing the staked tokens of the user
     function getStakedTokens(
         address _user
     ) external view returns (uint256[] memory) {
@@ -121,6 +146,9 @@ contract StakingHandler is IERC721Receiver {
     }
 
     //INTERNAL FUNCTIONS
+
+    /// @dev Updates the pool by minting new reward tokens and updating storage variables accordingly
+    /// @param _isDeposit A boolean that indicates if the update is due to a deposit or not
     function _updatePool(bool _isDeposit) internal {
         if (block.number <= s_lastRewardBlock) {
             return;

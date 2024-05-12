@@ -3,12 +3,15 @@ pragma solidity 0.8.24;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
-import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {Ownable, Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/utils/structs/Bitmaps.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
+/// @title Contracts that represents an NFT that allows users to buy, claim and stake NFTs and take advantages of discounts
+/// @author Sergi Roca Laguna
+/// @notice This contract allows users to buy, claim and stake NFTs and take advantages of discounts
+/// @dev This contract inherits from ERC721, ERC2981, Ownable and Ownable2Step
+contract NFT is ERC721, ERC2981, Ownable, Ownable2Step {
     using BitMaps for BitMaps.BitMap;
 
     error NFT__InvalidData();
@@ -98,6 +101,10 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
         _;
     }
 
+    /// @notice Initializes the contract with the merkle root and the artist address
+    /// @dev Initializes the contract with the merkle root and the artist address
+    /// @param _merkleRoot The merkle root of the merkle tree
+    /// @param _artist The address of the artist that will receive the royalties
     constructor(
         bytes32 _merkleRoot,
         address _artist
@@ -107,16 +114,17 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
     }
 
     //EXTERNAL
-    function supportsInterface(
-        bytes4 _interfaceId
-    ) public view override(ERC165, ERC721, ERC2981) returns (bool) {
-        return super.supportsInterface(_interfaceId);
-    }
 
+    /// @notice Sets the address of the staking handler contract, this address will use this ERC20 as staing rewards
+    /// @dev Allows the owner to set the address of the staking handler contract, which will mint and transfer these ERC20 tokens to the stakers
+    /// @param _stakingHandler The address of the staking handler contract
     function setStakingHandler(address _stakingHandler) external onlyOwner {
         s_stakingHandler = _stakingHandler;
     }
 
+    /// @notice Buys an NFT with a given ID
+    /// @dev Mints an NFT with the given ID and assigns it to the sender
+    /// @param _tokenId The ID of the NFT to buy
     function buy(
         uint256 _tokenId
     ) external payable applyBuyChecks(_tokenId, REGULAR_PRICE) {
@@ -125,6 +133,11 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
         emit Bought(msg.sender, _tokenId, msg.value);
     }
 
+    /// @notice Buys an NFT with a given ID and a discount
+    /// @dev Mints an NFT with the given ID and assigns it to the sender
+    /// @param _tokenId The ID of the NFT to buy
+    /// @param _index The index of the discount
+    /// @param _proof The merkle proof of the discount to validate if the message sender is eligible for the discount
     function buyWithDiscount(
         uint256 _tokenId,
         uint256 _index,
@@ -147,6 +160,9 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
         emit BoughtWithDiscount(msg.sender, _tokenId, msg.value);
     }
 
+    /// @notice Buys an NFT with a given ID and stakes it
+    /// @dev Mints an NFT with the given ID and assigns it to the contract, then transfers it to the staking handler
+    /// @param _tokenId The ID of the NFT to buy
     function buyAndStake(
         uint256 _tokenId
     ) external payable applyBuyChecks(_tokenId, REGULAR_PRICE) {
@@ -156,6 +172,11 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
         emit BoughtAndStaked(msg.sender, _tokenId, msg.value);
     }
 
+    /// @notice Buys an NFT with a given ID and a discount and stakes it
+    /// @dev Mints an NFT with the given ID and assigns it to the contract, then transfers it to the staking handler
+    /// @param _tokenId The ID of the NFT to buy
+    /// @param _index The index of the discount
+    /// @param _proof The merkle proof of the discount to validate if the message sender is eligible for the discount
     function buyWithDiscountAndStake(
         uint256 _tokenId,
         uint256 _index,
@@ -180,6 +201,8 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
         emit BoughtAndStaked(msg.sender, _tokenId, msg.value);
     }
 
+    /// @notice Withdraws the funds from the contract
+    /// @dev Allows the owner to withdraw the funds from the contract
     function withdrawFunds() external onlyOwner {
         (bool success, ) = payable(msg.sender).call{
             value: address(this).balance
@@ -192,22 +215,38 @@ contract NFT is ERC165, ERC721, ERC2981, Ownable, Ownable2Step {
 
     //PUBLIC
 
+    ///@inheritdoc ERC2981
+    function supportsInterface(
+        bytes4 _interfaceId
+    ) public view override(ERC721, ERC2981) returns (bool) {
+        return super.supportsInterface(_interfaceId);
+    }
+
+    ///@notice Allows the owner to transfer the ownership of the contract
+    ///@dev Allows the owner to transfer the ownership of the to another addresss. The new owner must accept the ownership before becoming the owner
+    ///@param _newOwner The address of the new owner
     function transferOwnership(
         address _newOwner
     ) public override(Ownable, Ownable2Step) onlyOwner {
         s_pendingOwner = _newOwner;
     }
 
+    ///@notice Allows the pending owner to accept the ownership of the contract
+    ///@dev Allows the pending owner to accept the ownership of the contract, which has been set via the transferOwnership function
     function acceptOwnership() public override(Ownable2Step) onlyPendingOwner {
         _transferOwnership(msg.sender);
     }
 
-    function isClaimed(uint256 index) public view returns (bool) {
-        return s_claimedBitMap.get(index);
+    ///@notice Checks if a given number has been claimed by a discount user
+    ///@dev Checks if a given number has been claimed by a discount user
+    ///@param _index The index of the discount
+    function isClaimed(uint256 _index) public view returns (bool) {
+        return s_claimedBitMap.get(_index);
     }
 
     //INTERNAL
-
+    ///@dev Sets the owner of the contract
+    ///@param _newOwner The address of the new owner
     function _transferOwnership(
         address _newOwner
     ) internal override(Ownable, Ownable2Step) {
