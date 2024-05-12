@@ -16,6 +16,7 @@ contract StakingHandler is IERC721Receiver {
 
     error StakingHandler__WrongNFT();
     error StakingHandler__ZeroAmountStaked();
+    error StakingHandler__NotTokenOwner();
 
     //STORAGE
     address immutable i_nft;
@@ -37,6 +38,11 @@ contract StakingHandler is IERC721Receiver {
     );
 
     event NFTStaked(address indexed user, uint256 tokenId, uint256 timestamp);
+    event NFTWithdrawn(
+        address indexed user,
+        uint256 tokenId,
+        uint256 timestamp
+    );
     event TestWithdrawCalculationsInUpdate(uint256 accRewardPerToken);
     event TestTokenSupplyStaked(uint256 tokenSupplyStaked);
 
@@ -122,15 +128,22 @@ contract StakingHandler is IERC721Receiver {
 
     /// @notice Withdraws the NFT staked by the sender
     /// @dev Withdraws the NFT staked by the sender
-    function withdrawNFT() external {
+    function withdrawNFT(uint256 _tokenId) external {
         if (s_userToUserInfo[msg.sender].amount == 0) {
             revert StakingHandler__ZeroAmountStaked();
         }
-        _updatePool(false);
-        IRewardToken(i_rewardToken).mint(address(this), 10);
+
+        if (
+            s_userToTokenToStakingState[msg.sender][_tokenId].startedBlock == 0
+        ) {
+            revert StakingHandler__NotTokenOwner();
+        }
+
+        --s_userToUserInfo[msg.sender].amount;
+
         IERC721(i_nft).safeTransferFrom(address(this), msg.sender, 0);
 
-        emit StakingWithdrawn(msg.sender, 0, block.number);
+        emit NFTWithdrawn(msg.sender, _tokenId, block.number);
     }
 
     //VIEW FUNCTIONS

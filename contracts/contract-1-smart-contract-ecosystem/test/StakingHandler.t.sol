@@ -30,6 +30,7 @@ contract StakingHandlerTest is Test {
         vm.stopPrank();
         vm.deal(user, 500);
         vm.deal(user2, 500);
+        vm.deal(owner, 500);
     }
 
     function testInitialSupply() public view {
@@ -55,6 +56,27 @@ contract StakingHandlerTest is Test {
         assertEq(rewardToken.balanceOf(user), 10);
     }
 
+    function testCanWithdrawNFT() public {
+        vm.startPrank(user);
+        nft.buy{value: 100}(0);
+        nft.safeTransferFrom(user, address(stakingHandler), 0);
+        stakingHandler.withdrawNFT(0);
+        vm.stopPrank();
+        assertEq(nft.balanceOf(user), 1);
+    }
+
+    function testCannotWithdrawNFTIfNotStaker() public {
+        vm.startPrank(user);
+        nft.buy{value: 100}(0);
+        nft.safeTransferFrom(user, address(stakingHandler), 0);
+        vm.stopPrank();
+        vm.startPrank(owner);
+        nft.buy{value: 100}(1);
+        nft.safeTransferFrom(owner, address(stakingHandler), 1);
+        vm.expectRevert();
+        stakingHandler.withdrawNFT(0);
+        vm.stopPrank();
+    }
     function testCanWithdrawProportionalRewardsIfMultipleUsersSameBlock()
         public
     {
