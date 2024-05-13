@@ -154,4 +154,16 @@ contract StakingHandlerTest is Test {
 
         assertEq(stakedTokens.length, 1);
     }
+
+    function testUserDepositsTwiceAndWithdraws() public {
+        vm.startPrank(user);
+        nft.buy{value: 100}(0);
+        nft.safeTransferFrom(user, address(stakingHandler), 0);
+        nft.buy{value: 100}(1);
+        nft.safeTransferFrom(user, address(stakingHandler), 1);
+        vm.roll(block.number + BLOCKS_IN_A_DAY);
+        stakingHandler.withdrawStakingRewards();
+        vm.stopPrank();
+        assertEq(rewardToken.balanceOf(user), 10 * REWARD_TOKEN_PRECISION);
+    }
 }

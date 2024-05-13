@@ -91,10 +91,8 @@ contract NFTTest is Test {
         nft.buy{value: 100}(MOCK_TOKEN_ID);
     }
 
-    function testCannotBuyWithDiscountIfAddressNotInMerkleTree(
-        address _user
-    ) public {
-        vm.prank(_user);
+    function testCannotBuyWithDiscountIfAddressNotInMerkleTree() public {
+        vm.prank(user);
         proof[0] = leafs[1];
         proof[1] = layer2[1];
         vm.expectRevert();

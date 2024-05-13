@@ -117,8 +117,18 @@ contract StakingHandler is IERC721Receiver {
         if (s_userToUserInfo[msg.sender].amount == 0) {
             revert StakingHandler__ZeroAmountStaked();
         }
-        uint256 withdrawableAmount = s_accRewardPerToken -
-            s_userToUserInfo[msg.sender].rewardDebt;
+        uint256 stakedTokens = s_userToStakedTokens[msg.sender].length;
+
+        uint256 withdrawableAmount = 0;
+
+        for (uint256 i = 0; i < stakedTokens; ++i) {
+            uint256 tokenId = s_userToStakedTokens[msg.sender][i];
+            uint256 rewardPerToken = s_userToTokenToStakingState[msg.sender][
+                tokenId
+            ].startingAccRewardPerToken;
+
+            withdrawableAmount += (s_accRewardPerToken - rewardPerToken);
+        }
 
         s_userToUserInfo[msg.sender].rewardDebt = s_accRewardPerToken;
         IERC20(i_rewardToken).safeTransfer(msg.sender, withdrawableAmount);
