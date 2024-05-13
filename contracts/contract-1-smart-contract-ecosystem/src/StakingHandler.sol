@@ -53,17 +53,10 @@ contract StakingHandler is IERC721Receiver {
 
     mapping(address user => uint256[] tokenIds) public s_userToStakedTokens;
 
-    mapping(address user => UserInfo) public s_userToUserInfo;
-
     //STRUCTS
     struct StakingState {
         uint256 startedBlock;
         uint256 startingAccRewardPerToken;
-    }
-
-    struct UserInfo {
-        uint256 amount;
-        uint256 rewardDebt;
     }
 
     /// @notice Initializes the contract with the NFT and reward token addresses
@@ -95,10 +88,6 @@ contract StakingHandler is IERC721Receiver {
         }
 
         _updateRewards(true);
-        unchecked {
-            ++s_userToUserInfo[_operator].amount;
-        }
-        s_userToUserInfo[_operator].rewardDebt += s_accRewardPerToken;
         s_userToTokenToStakingState[_operator][_tokenId] = StakingState(
             block.number,
             s_accRewardPerToken
@@ -114,7 +103,7 @@ contract StakingHandler is IERC721Receiver {
     /// @dev Withdraws the corresponding minted ERC20 minted tokens for the sender
     function withdrawStakingRewards() external {
         _updateRewards(false);
-        if (s_userToUserInfo[msg.sender].amount == 0) {
+        if (s_userToStakedTokens[msg.sender].length == 0) {
             revert StakingHandler__ZeroAmountStaked();
         }
         uint256 stakedTokens = s_userToStakedTokens[msg.sender].length;
@@ -129,8 +118,6 @@ contract StakingHandler is IERC721Receiver {
 
             withdrawableAmount += (s_accRewardPerToken - rewardPerToken);
         }
-
-        s_userToUserInfo[msg.sender].rewardDebt = s_accRewardPerToken;
         IERC20(i_rewardToken).safeTransfer(msg.sender, withdrawableAmount);
 
         emit StakingWithdrawn(msg.sender, withdrawableAmount, block.number);
@@ -139,7 +126,7 @@ contract StakingHandler is IERC721Receiver {
     /// @notice Withdraws the NFT staked by the sender
     /// @dev Withdraws the NFT staked by the sender
     function withdrawNFT(uint256 _tokenId) external {
-        if (s_userToUserInfo[msg.sender].amount == 0) {
+        if (s_userToStakedTokens[msg.sender].length == 0) {
             revert StakingHandler__ZeroAmountStaked();
         }
 
@@ -149,7 +136,17 @@ contract StakingHandler is IERC721Receiver {
             revert StakingHandler__NotTokenOwner();
         }
 
-        --s_userToUserInfo[msg.sender].amount;
+        delete s_userToTokenToStakingState[msg.sender][_tokenId];
+
+        uint256[] storage stakedTokens = s_userToStakedTokens[msg.sender];
+        uint256 stakedTokensLength = stakedTokens.length;
+        for (uint256 i = 0; i < stakedTokensLength; ++i) {
+            if (stakedTokens[i] == _tokenId) {
+                stakedTokens[i] = stakedTokens[stakedTokensLength - 1];
+                stakedTokens.pop();
+                break;
+            }
+        }
 
         IERC721(i_nft).safeTransferFrom(address(this), msg.sender, 0);
 
