@@ -26,7 +26,7 @@ contract StakingHandler is IERC721Receiver {
     uint256 public constant STAKING_REWARD = 10;
     uint256 public constant STAKING_REWARD_PERIOD = 1 days;
     uint256 public constant BLOCKS_IN_A_DAY = 7200;
-    uint256 public constant REWARD_TOKEN_PRECISION = 18;
+    uint256 public constant REWARD_TOKEN_PRECISION = 10e18;
 
     uint256 s_lastRewardBlock = block.number;
     uint256 s_accRewardPerToken;
@@ -180,14 +180,20 @@ contract StakingHandler is IERC721Receiver {
             return;
         }
 
-        uint256 rewardToMint = ((block.number - s_lastRewardBlock) *
-            STAKING_REWARD) / BLOCKS_IN_A_DAY;
+        uint256 elapsedBlocks = block.number - s_lastRewardBlock;
+        uint256 totalReward = elapsedBlocks * STAKING_REWARD;
 
+        uint256 rewardToMint = (totalReward * REWARD_TOKEN_PRECISION) /
+            BLOCKS_IN_A_DAY;
+        uint256 remainder = (totalReward * REWARD_TOKEN_PRECISION) %
+            BLOCKS_IN_A_DAY;
+
+        rewardToMint += remainder;
         if (_isDeposit) {
             --tokenSupplyStaked;
         }
 
-        s_accRewardPerToken += rewardToMint / tokenSupplyStaked;
+        s_accRewardPerToken += (rewardToMint / tokenSupplyStaked);
         if (tokenSupplyStaked > 0) {
             emit TestWithdrawCalculationsInUpdate(s_accRewardPerToken);
         }

@@ -13,6 +13,7 @@ contract StakingHandlerTest is Test {
 
     uint256 public constant MAX_SUPPLY = 1_000;
     uint256 public constant BLOCKS_IN_A_DAY = 7200;
+    uint256 public constant REWARD_TOKEN_PRECISION = 10e18;
     address owner = makeAddr("OWNER");
     address user = makeAddr("USER");
     address user2 = makeAddr("USER2");
@@ -53,7 +54,7 @@ contract StakingHandlerTest is Test {
         vm.roll(block.number + BLOCKS_IN_A_DAY);
         stakingHandler.withdrawStakingRewards();
         vm.stopPrank();
-        assertEq(rewardToken.balanceOf(user), 10);
+        assertEq(rewardToken.balanceOf(user), 10 * REWARD_TOKEN_PRECISION);
     }
 
     function testCanWithdrawNFT() public {
@@ -94,9 +95,9 @@ contract StakingHandlerTest is Test {
         vm.prank(user2);
         stakingHandler.withdrawStakingRewards();
 
-        assertEq(rewardToken.totalSupply(), 10);
-        assertEq(rewardToken.balanceOf(user), 5);
-        assertEq(rewardToken.balanceOf(user2), 5);
+        assertEq(rewardToken.totalSupply(), 10 * REWARD_TOKEN_PRECISION);
+        assertEq(rewardToken.balanceOf(user), 5 * REWARD_TOKEN_PRECISION);
+        assertEq(rewardToken.balanceOf(user2), 5 * REWARD_TOKEN_PRECISION);
     }
 
     function testCanWithdrawProportionalRewardsIfMultipleUsersDifferentBlocks()
@@ -117,9 +118,31 @@ contract StakingHandlerTest is Test {
         vm.prank(user2);
         stakingHandler.withdrawStakingRewards();
 
-        assertEq(rewardToken.totalSupply(), 20);
-        assertEq(rewardToken.balanceOf(user), 15);
-        assertEq(rewardToken.balanceOf(user2), 5);
+        assertEq(rewardToken.totalSupply(), 20 * REWARD_TOKEN_PRECISION);
+        assertEq(rewardToken.balanceOf(user), 15 * REWARD_TOKEN_PRECISION);
+        assertEq(rewardToken.balanceOf(user2), 5 * REWARD_TOKEN_PRECISION);
+    }
+
+    function testWithDrawRewardsAfterHalfADay() public {
+        vm.startPrank(user);
+        nft.buy{value: 100}(0);
+        nft.safeTransferFrom(user, address(stakingHandler), 0);
+        vm.roll(block.number + BLOCKS_IN_A_DAY / 2);
+        stakingHandler.withdrawStakingRewards();
+        vm.stopPrank();
+        assertEq(rewardToken.balanceOf(user), 5 * REWARD_TOKEN_PRECISION);
+    }
+
+    function testWithdrawAfterQuarterOfADay() public {
+        vm.startPrank(user);
+        nft.buy{value: 100}(0);
+        nft.safeTransferFrom(user, address(stakingHandler), 0);
+        vm.roll(block.number + BLOCKS_IN_A_DAY / 4);
+        stakingHandler.withdrawStakingRewards();
+        vm.stopPrank();
+        uint256 reward = (2 * REWARD_TOKEN_PRECISION) +
+            (REWARD_TOKEN_PRECISION / 2);
+        assertEq(rewardToken.balanceOf(user), reward);
     }
 
     function testGetStakedTokens() public {
