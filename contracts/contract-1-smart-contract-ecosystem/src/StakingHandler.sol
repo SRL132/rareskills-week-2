@@ -31,6 +31,18 @@ contract StakingHandler is IERC721Receiver {
     uint256 s_lastRewardBlock = block.number;
     uint256 s_accRewardPerToken;
 
+    //STAKING
+    mapping(address user => mapping(uint256 tokenId => StakingState))
+        public s_userToTokenToStakingState;
+
+    mapping(address user => uint256[] tokenIds) public s_userToStakedTokens;
+
+    //STRUCTS
+    struct StakingState {
+        uint256 startedBlock;
+        uint256 startingAccRewardPerToken;
+    }
+
     //EVENTS
     event StakingWithdrawn(
         address indexed user,
@@ -46,18 +58,6 @@ contract StakingHandler is IERC721Receiver {
     );
     event TestWithdrawCalculationsInUpdate(uint256 accRewardPerToken);
     event TestTokenSupplyStaked(uint256 tokenSupplyStaked);
-
-    //STAKING
-    mapping(address user => mapping(uint256 tokenId => StakingState))
-        public s_userToTokenToStakingState;
-
-    mapping(address user => uint256[] tokenIds) public s_userToStakedTokens;
-
-    //STRUCTS
-    struct StakingState {
-        uint256 startedBlock;
-        uint256 startingAccRewardPerToken;
-    }
 
     /// @notice Initializes the contract with the NFT and reward token addresses
     /// @dev Initializes the contract with the NFT and reward token addresses
