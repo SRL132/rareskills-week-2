@@ -133,7 +133,9 @@ contract StakingHandler is IERC721Receiver {
     /// @notice Withdraws the NFT staked by the sender
     /// @dev Withdraws the NFT staked by the sender and transfers the corresponding rewards to the sender and updates the debt and storage variables accordingly
     function withdrawNFT(uint256 _tokenId) external {
-        if (s_userToStakedTokens[msg.sender].length == 0) {
+        uint256 amountStaked = s_userToStakedTokens[msg.sender].length;
+
+        if (amountStaked == 0) {
             revert StakingHandler__ZeroAmountStaked();
         }
 
@@ -142,10 +144,9 @@ contract StakingHandler is IERC721Receiver {
         }
 
         // Calculate the rewards to withdraw for the user and update the debt
-        uint256 amount = s_userToStakedTokens[msg.sender].length;
 
         uint256 amountRewardForOneToken = s_accRewardPerToken -
-            (s_userToAccumulatedRewardDebt[msg.sender] / amount);
+            (s_userToAccumulatedRewardDebt[msg.sender] / amountStaked);
 
         s_userToAccumulatedRewardDebt[msg.sender] += amountRewardForOneToken;
 
@@ -164,7 +165,7 @@ contract StakingHandler is IERC721Receiver {
         uint256 userTokenIndex = s_ownedStakedTokensIndex[_tokenId];
 
         uint256 lastUserToken = s_userToStakedTokens[msg.sender][
-            s_userToStakedTokens[msg.sender].length - 1
+            amountStaked - 1
         ];
 
         s_userToStakedTokens[msg.sender][userTokenIndex] = lastUserToken;
