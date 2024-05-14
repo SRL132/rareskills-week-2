@@ -131,6 +131,8 @@ contract StakingHandler is IERC721Receiver {
             stakedTokens -
             (s_userToAccumulatedRewardDebt[msg.sender]);
 
+        s_userToAccumulatedRewardDebt[msg.sender] += withdrawableAmount;
+
         IERC20(i_rewardToken).safeTransfer(msg.sender, withdrawableAmount);
 
         emit StakingWithdrawn(msg.sender, withdrawableAmount, block.number);
