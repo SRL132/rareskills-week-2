@@ -32,8 +32,6 @@ contract StakingHandler is IERC721Receiver {
     uint256 s_accRewardPerToken;
 
     //STAKING
-    mapping(address user => mapping(uint256 tokenId => StakingState))
-        public s_userToTokenToStakingState;
 
     mapping(address user => uint256[] tokenIds) public s_userToStakedTokens;
 
@@ -45,10 +43,11 @@ contract StakingHandler is IERC721Receiver {
 
     mapping(address user => uint256) private s_userToAccumulatedRewardDebt;
 
+    mapping(uint256 tokenId => address) private s_tokenToStaker;
+
     //STRUCTS
     struct StakingState {
         uint256 startedBlock;
-        uint256 startingAccRewardPerToken;
     }
 
     //EVENTS
@@ -94,10 +93,8 @@ contract StakingHandler is IERC721Receiver {
         }
 
         _updateRewards(true);
-        s_userToTokenToStakingState[_operator][_tokenId] = StakingState(
-            block.number,
-            s_accRewardPerToken
-        );
+
+        s_tokenToStaker[_tokenId] = _operator;
 
         s_userToStakedTokens[_operator].push(_tokenId);
 
@@ -140,13 +137,9 @@ contract StakingHandler is IERC721Receiver {
             revert StakingHandler__ZeroAmountStaked();
         }
 
-        if (
-            s_userToTokenToStakingState[msg.sender][_tokenId].startedBlock == 0
-        ) {
+        if (s_tokenToStaker[_tokenId] != msg.sender) {
             revert StakingHandler__NotTokenOwner();
         }
-
-        s_userToTokenToStakingState[msg.sender][_tokenId] = StakingState(0, 0);
 
         uint256 tokenIndex = s_allStakedTokensIndex[_tokenId];
         uint256 lastToken = s_allStakedTokens[s_allStakedTokens.length - 1];
@@ -172,6 +165,8 @@ contract StakingHandler is IERC721Receiver {
         s_ownedStakedTokensIndex[lastUserToken] = userTokenIndex;
 
         s_ownedStakedTokensIndex[_tokenId] = 0;
+
+        s_tokenToStaker[_tokenId] = address(0);
 
         IERC721(i_nft).safeTransferFrom(address(this), msg.sender, 0);
 
