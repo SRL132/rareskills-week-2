@@ -167,14 +167,17 @@ contract StakingHandlerTest is Test {
         assertEq(rewardToken.balanceOf(user), 10 * REWARD_TOKEN_PRECISION);
     }
 
-    function testUserDepositsThreeNFTWithdrawsOneThenWithdrawRewards() public {
+    function testUserDepositsThreeNFTWithdrawsOneThenWithdrawRewards(
+        uint256 _fuzzedId
+    ) public {
+        vm.assume(_fuzzedId < 1000 && _fuzzedId != 0 && _fuzzedId != 3);
         vm.startPrank(user);
         nft.buy{value: 100}(0);
         nft.safeTransferFrom(user, address(stakingHandler), 0);
-        nft.buy{value: 100}(1);
-        nft.safeTransferFrom(user, address(stakingHandler), 1);
-        nft.buy{value: 100}(2);
-        nft.safeTransferFrom(user, address(stakingHandler), 2);
+        nft.buy{value: 100}(_fuzzedId);
+        nft.safeTransferFrom(user, address(stakingHandler), _fuzzedId);
+        nft.buy{value: 100}(3);
+        nft.safeTransferFrom(user, address(stakingHandler), 3);
         stakingHandler.withdrawNFT(0);
         vm.roll(block.number + BLOCKS_IN_A_DAY);
         stakingHandler.withdrawStakingRewards();
