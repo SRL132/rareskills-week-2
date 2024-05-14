@@ -166,4 +166,23 @@ contract StakingHandlerTest is Test {
         vm.stopPrank();
         assertEq(rewardToken.balanceOf(user), 10 * REWARD_TOKEN_PRECISION);
     }
+
+    function testUserDepositsThreeNFTWithdrawsOneThenWithdrawRewards() public {
+        vm.startPrank(user);
+        nft.buy{value: 100}(0);
+        nft.safeTransferFrom(user, address(stakingHandler), 0);
+        nft.buy{value: 100}(1);
+        nft.safeTransferFrom(user, address(stakingHandler), 1);
+        nft.buy{value: 100}(2);
+        nft.safeTransferFrom(user, address(stakingHandler), 2);
+        stakingHandler.withdrawNFT(0);
+        vm.roll(block.number + BLOCKS_IN_A_DAY);
+        stakingHandler.withdrawStakingRewards();
+        assertEq(rewardToken.balanceOf(user), 10 * REWARD_TOKEN_PRECISION);
+        assertEq(nft.balanceOf(user), 1);
+        vm.roll(block.number + BLOCKS_IN_A_DAY);
+        stakingHandler.withdrawStakingRewards();
+        assertEq(rewardToken.balanceOf(user), 20 * REWARD_TOKEN_PRECISION);
+        vm.stopPrank();
+    }
 }

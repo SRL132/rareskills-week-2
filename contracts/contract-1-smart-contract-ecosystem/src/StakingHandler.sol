@@ -124,7 +124,7 @@ contract StakingHandler is IERC721Receiver {
 
         uint256 withdrawableAmount = s_accRewardPerToken *
             stakedTokens -
-            (s_userToAccumulatedRewardDebt[msg.sender]);
+            s_userToAccumulatedRewardDebt[msg.sender];
 
         s_userToAccumulatedRewardDebt[msg.sender] += withdrawableAmount;
 
