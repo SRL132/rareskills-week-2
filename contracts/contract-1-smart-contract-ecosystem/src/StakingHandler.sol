@@ -44,11 +44,6 @@ contract StakingHandler is IERC721Receiver {
     mapping(uint256 => uint256) private s_ownedStakedTokensIndex;
 
     mapping(address user => uint256) private s_userToAccumulatedRewardDebt;
-    //OWNERSHIP TRACKING
-    // mapping(address => uint256[]) private s_ownedTokens;
-    //  mapping(uint256 => uint256) private s_ownedTokensIndex;
-    // uint256[] private s_allTokens;
-    // mapping(uint256 => uint256) private s_allTokensIndex;
 
     //STRUCTS
     struct StakingState {
