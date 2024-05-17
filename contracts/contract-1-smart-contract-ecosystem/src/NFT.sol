@@ -128,7 +128,7 @@ contract NFT is ERC721, ERC2981, Ownable2Step {
     function buy(
         uint256 _tokenId
     ) external payable applyBuyChecks(_tokenId, REGULAR_PRICE) {
-        _mint(msg.sender, _tokenId);
+        _safeMint(msg.sender, _tokenId);
 
         emit Bought(msg.sender, _tokenId, msg.value);
     }
@@ -156,7 +156,7 @@ contract NFT is ERC721, ERC2981, Ownable2Step {
             revert NFT__AlreadyClaimed();
         }
         s_claimedBitMap.set(calculatedIndex);
-        _mint(msg.sender, _tokenId);
+        _safeMint(msg.sender, _tokenId);
         emit BoughtWithDiscount(msg.sender, _tokenId, msg.value);
     }
 
