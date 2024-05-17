@@ -44,7 +44,7 @@ contract EnumerableNFT is ERC721, IERC721Enumerable {
         if (_tokenId == 0 || _tokenId > MAX_TOKEN_ID) {
             revert EnumerableNFT__OutOfBoundsTokenId();
         }
-        _mint(_to, _tokenId);
+        _safeMint(_to, _tokenId);
         s_allTokensIndex[_tokenId] = s_allTokens.length;
         s_allTokens.push(_tokenId);
         s_ownedTokens[_to].push(_tokenId);
