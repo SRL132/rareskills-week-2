@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 /// @author Sergi Roca Laguna
 /// @notice This contract allows users to buy, claim and stake NFTs and take advantages of discounts
 /// @dev This contract inherits from ERC721, ERC2981, Ownable and Ownable2Step
-contract NFT is ERC721, ERC2981, Ownable, Ownable2Step {
+contract NFT is ERC721, ERC2981, Ownable2Step {
     using BitMaps for BitMaps.BitMap;
 
     error NFT__InvalidData();
@@ -222,35 +222,10 @@ contract NFT is ERC721, ERC2981, Ownable, Ownable2Step {
         return super.supportsInterface(_interfaceId);
     }
 
-    ///@notice Allows the owner to transfer the ownership of the contract
-    ///@dev Allows the owner to transfer the ownership of the to another addresss. The new owner must accept the ownership before becoming the owner
-    ///@param _newOwner The address of the new owner
-    function transferOwnership(
-        address _newOwner
-    ) public override(Ownable, Ownable2Step) onlyOwner {
-        s_pendingOwner = _newOwner;
-    }
-
-    ///@notice Allows the pending owner to accept the ownership of the contract
-    ///@dev Allows the pending owner to accept the ownership of the contract, which has been set via the transferOwnership function
-    function acceptOwnership() public override(Ownable2Step) onlyPendingOwner {
-        _transferOwnership(msg.sender);
-    }
-
     ///@notice Checks if a given number has been claimed by a discount user
     ///@dev Checks if a given number has been claimed by a discount user
     ///@param _index The index of the discount
     function isClaimed(uint256 _index) public view returns (bool) {
         return s_claimedBitMap.get(_index);
-    }
-
-    //INTERNAL
-    ///@dev Sets the owner of the contract
-    ///@param _newOwner The address of the new owner
-    function _transferOwnership(
-        address _newOwner
-    ) internal override(Ownable, Ownable2Step) {
-        s_pendingOwner = address(0);
-        super._transferOwnership(_newOwner);
     }
 }
