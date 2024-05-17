@@ -5,8 +5,8 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 /// @title A title that should describe the contract/interface
 /// @author Sergi Roca Laguna
-/// @notice This contract allows users to mint NFTs with IDs [1, 100] and retrieve information about them
-/// @dev This contract inherits from ERC721 and IERC721Enumerable
+/// @notice This contract allows users to mint a maximum of NFTs with IDs [1, 100] and retrieve information about them
+/// @dev This contract inherits from ERC721 and IERC721Enumerable for gas optimization
 contract EnumerableNFT is ERC721, IERC721Enumerable {
     error EnumerableNFT__OutOfBoundsIndex(uint256 index);
     error EnumerableNFT__TotalSupplyReached();
@@ -37,7 +37,7 @@ contract EnumerableNFT is ERC721, IERC721Enumerable {
     /// @param _to The address of the user that will own the minted NFT
     /// @param _tokenId The ID of the minted NFT
     function mint(address _to, uint256 _tokenId) external {
-        if (totalSupply() >= 20) {
+        if (totalSupply() >= MAX_SUPPLY) {
             revert EnumerableNFT__TotalSupplyReached();
         }
 
