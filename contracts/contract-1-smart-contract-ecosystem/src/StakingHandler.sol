@@ -224,10 +224,7 @@ contract StakingHandler is IERC721Receiver {
 
         uint256 rewardToMint = (totalReward * REWARD_TOKEN_PRECISION) /
             BLOCKS_IN_A_DAY;
-        uint256 remainder = (totalReward * REWARD_TOKEN_PRECISION) %
-            BLOCKS_IN_A_DAY;
 
-        rewardToMint += remainder;
         if (_isDeposit) {
             --tokenSupplyStaked;
         }
