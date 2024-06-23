@@ -38,7 +38,7 @@ Mutation:
 
 #################################################
 
-#### 2-Helped me detect issues in the discount limitations
+#### 2-Helped me detect issues in the discount limitations, and helped me to make it more restrictive
 Mutation:
     File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
     Line nr: 69
@@ -51,7 +51,7 @@ Mutation:
 
 #################################################
 
-#### 3-Helped me detect issues in the discount limitations
+#### 3-Helped me detect missing testing in terms of access control
 
 Mutation:
     File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol

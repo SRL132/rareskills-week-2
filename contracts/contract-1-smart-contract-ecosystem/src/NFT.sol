@@ -67,7 +67,7 @@ contract NFT is ERC721, ERC2981, Ownable2Step {
     }
 
     modifier applyDiscountChecks(uint256 _index, bytes32[] calldata _proof) {
-        if (_index > PROMISED_AMOUNT) {
+        if (_index >= PROMISED_AMOUNT) {
             revert NFT__AmountOverMaximum();
         }
 
