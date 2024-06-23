@@ -1,6 +1,7 @@
 Mutation testing report:
 Number of mutations:    52
 Killed:                 41 / 52
+Lived: 8
 
 Mutations:
 Mutation:
