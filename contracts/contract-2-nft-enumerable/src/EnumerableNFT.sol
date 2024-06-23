@@ -3,7 +3,7 @@ pragma solidity 0.8.24;
 import {IERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-/// @title A title that should describe the contract/interface
+/// @title EnumerableNFT
 /// @author Sergi Roca Laguna
 /// @notice This contract allows users to mint a maximum of NFTs with IDs [1, 100] and retrieve information about them
 /// @dev This contract inherits from ERC721 and IERC721Enumerable for gas optimization
