@@ -182,7 +182,7 @@ contract StakingHandler is IERC721Receiver {
 
         IERC20(i_rewardToken).safeTransfer(msg.sender, amountRewardForOneToken);
 
-        IERC721(i_nft).safeTransferFrom(address(this), msg.sender, 0);
+        IERC721(i_nft).safeTransferFrom(address(this), msg.sender, _tokenId);
 
         emit NFTWithdrawn(msg.sender, _tokenId, block.number);
     }
@@ -210,14 +210,10 @@ contract StakingHandler is IERC721Receiver {
 
         uint256 tokenSupplyStaked = IERC721(i_nft).balanceOf(address(this));
 
-        if (tokenSupplyStaked == 0) {
-            s_lastRewardBlock = block.number;
-            return;
-        }
-        if (s_lastRewardBlock == 0) {
-            s_lastRewardBlock = block.number;
-            return;
-        }
+        // if (tokenSupplyStaked == 0) {
+        //      s_lastRewardBlock = block.number;
+        //    return;
+        //    }
 
         uint256 elapsedBlocks = block.number - s_lastRewardBlock;
         uint256 totalReward = elapsedBlocks * STAKING_REWARD;

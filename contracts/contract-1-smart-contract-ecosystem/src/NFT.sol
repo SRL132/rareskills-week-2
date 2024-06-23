@@ -17,7 +17,6 @@ contract NFT is ERC721, ERC2981, Ownable2Step {
     error NFT__InvalidData();
     error NFT__AmountOverMaximum();
     error NFT__NotEnoughMoney();
-    error NFT__WithdrawFailed();
     error NFT__AlreadyClaimed();
 
     //STORAGE
@@ -28,10 +27,9 @@ contract NFT is ERC721, ERC2981, Ownable2Step {
     uint256 public constant REGULAR_PRICE = 100;
     uint96 public constant ROYALTY_REWARD_RATE = 250;
     uint256 public constant PROMISED_AMOUNT = 3;
-    uint256 public constant MAX_DISCOUNT_TOKENS_AMOUNT = 3 * 256;
 
     //MERKLE TREE
-    bytes32 private immutable s_merkleRoot;
+    bytes32 private immutable i_merkleRoot;
 
     //BITMAP
     BitMaps.BitMap private s_claimedBitMap;
@@ -51,10 +49,6 @@ contract NFT is ERC721, ERC2981, Ownable2Step {
 
     //STAKING
     address s_stakingHandler;
-
-    //ROYALTIES
-    uint256 private constant ROYALTEE_FEE_DENOMINATOR = 10_000;
-    uint256 private constant ROYALTIES_FEE_PRECISION = 10e18;
 
     //EVENTS
     event Bought(address indexed user, uint256 indexed index, uint256 amount);
@@ -80,7 +74,7 @@ contract NFT is ERC721, ERC2981, Ownable2Step {
         if (
             !MerkleProof.verify(
                 _proof,
-                s_merkleRoot,
+                i_merkleRoot,
                 keccak256(abi.encodePacked(msg.sender))
             )
         ) {
@@ -99,7 +93,7 @@ contract NFT is ERC721, ERC2981, Ownable2Step {
         address _artist
     ) ERC721("MerkleNFT", "MNFT") Ownable(msg.sender) {
         _setDefaultRoyalty(_artist, ROYALTY_REWARD_RATE);
-        s_merkleRoot = _merkleRoot;
+        i_merkleRoot = _merkleRoot;
     }
 
     //EXTERNAL
@@ -192,10 +186,12 @@ contract NFT is ERC721, ERC2981, Ownable2Step {
 
     /// @notice Withdraws the funds from the contract
     /// @dev Allows the owner to withdraw the funds from the contract
-    function withdrawFunds() external onlyOwner {
+    function withdrawFunds() external onlyOwner returns (bool) {
         (bool success, ) = payable(msg.sender).call{
             value: address(this).balance
         }("");
+
+        return success;
     }
 
     //PUBLIC

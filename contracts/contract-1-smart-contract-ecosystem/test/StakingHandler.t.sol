@@ -5,11 +5,13 @@ import {Test, console} from "forge-std/Test.sol";
 import {NFT} from "../src/NFT.sol";
 import {RewardToken} from "../src/RewardToken.sol";
 import {StakingHandler} from "../src/StakingHandler.sol";
+import {StakingHandlerHardness} from "./harness/StakingHandlerHarness.sol";
 
 contract StakingHandlerTest is Test {
     NFT public nft;
     RewardToken public rewardToken;
     StakingHandler public stakingHandler;
+    StakingHandlerHardness public stakingHandlerHardness;
 
     uint256 public constant MAX_SUPPLY = 1_000;
     uint256 public constant BLOCKS_IN_A_DAY = 7200;
@@ -27,6 +29,10 @@ contract StakingHandlerTest is Test {
         rewardToken = new RewardToken();
         stakingHandler = new StakingHandler(address(nft), address(rewardToken));
         rewardToken.setStakingHandler(address(stakingHandler));
+        stakingHandlerHardness = new StakingHandlerHardness(
+            address(nft),
+            address(rewardToken)
+        );
 
         vm.stopPrank();
         vm.deal(user, 500);
@@ -216,6 +222,23 @@ contract StakingHandlerTest is Test {
     function testCanDeployStakingHandler() public {
         vm.startPrank(owner);
         StakingHandler testStakingHandler = new StakingHandler(
+            address(nft),
+            address(rewardToken)
+        );
+        vm.stopPrank();
+        assertEq(rewardToken.totalSupply(), 0);
+    }
+
+    //updateRewards
+    function testUpdateRewards(bool isDeposit) public {
+        vm.startPrank(owner);
+        stakingHandlerHardness.updateRewards_HARNESS(isDeposit);
+        vm.stopPrank();
+    }
+
+    function testCanDeployHarness() public {
+        vm.startPrank(owner);
+        StakingHandlerHardness testStakingHandler = new StakingHandlerHardness(
             address(nft),
             address(rewardToken)
         );

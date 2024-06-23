@@ -126,10 +126,37 @@ contract NFTTest is Test {
         vm.stopPrank();
     }
 
+    function testCanBuyWithDiscount() public {
+        vm.startPrank(user1);
+        proof[0] = leafs[1];
+        proof[1] = layer2[1];
+        nft.buyWithDiscount{value: 20}(MOCK_TOKEN_ID, 1, proof);
+        assertEq(nft.balanceOf(user1), 1);
+        vm.stopPrank();
+    }
+
+    function testCannotBuyWithDiscountIfIndexIsMax() public {
+        vm.startPrank(user1);
+        proof[0] = leafs[1];
+        proof[1] = layer2[1];
+        vm.expectRevert();
+        nft.buyWithDiscount{value: 20}(MAX_SUPPLY + 1, 1, proof);
+        vm.stopPrank();
+    }
+
     function testCannotBuyIfValueBelowPrice() public {
         vm.startPrank(user1);
         vm.expectRevert();
         nft.buy{value: 10}(MOCK_TOKEN_ID);
+        vm.stopPrank();
+    }
+
+    function testCannotBuyWithDiscountIfValueBelowPrice() public {
+        vm.startPrank(user1);
+        proof[0] = leafs[1];
+        proof[1] = layer2[1];
+        vm.expectRevert();
+        nft.buyWithDiscount{value: 10}(MOCK_TOKEN_ID, 1, proof);
         vm.stopPrank();
     }
 
@@ -179,8 +206,18 @@ contract NFTTest is Test {
         proof[0] = leafs[1];
         proof[1] = layer2[1];
         nft.buyWithDiscountAndStake{value: 20}(MOCK_TOKEN_ID, 1, proof);
-        vm.expectRevert();
+        vm.expectRevert(NFT.NFT__AlreadyClaimed.selector);
         nft.buyWithDiscountAndStake{value: 20}(MOCK_TOKEN_ID, 1, proof);
+        vm.stopPrank();
+    }
+
+    function testCannotBuyWithDiscountIfAlreayClaimed() public {
+        vm.startPrank(user1);
+        proof[0] = leafs[1];
+        proof[1] = layer2[1];
+        nft.buyWithDiscount{value: 20}(MOCK_TOKEN_ID, 1, proof);
+        vm.expectRevert(NFT.NFT__AlreadyClaimed.selector);
+        nft.buyWithDiscount{value: 20}(MOCK_TOKEN_ID, 1, proof);
         vm.stopPrank();
     }
 
@@ -192,6 +229,7 @@ contract NFTTest is Test {
         nft.withdrawFunds();
         vm.prank(owner);
         nft.withdrawFunds();
+        assertEq(address(owner).balance, 100);
     }
 
     //OWNERSHIP TESTS
