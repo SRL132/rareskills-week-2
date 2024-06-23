@@ -122,7 +122,7 @@ contract NFTTest is Test {
     function testCannotBuyTokenIdOverMaxSupply() public {
         vm.startPrank(user1);
         vm.expectRevert();
-        nft.buy{value: 100}(MAX_SUPPLY);
+        nft.buy{value: 100}(MAX_SUPPLY + 1);
         vm.stopPrank();
     }
 
@@ -201,6 +201,38 @@ contract NFTTest is Test {
         vm.stopPrank();
     }
 
+    function testCannotBuyAndStakeIfNotEnoughMoney() public {
+        vm.startPrank(user);
+        vm.expectRevert();
+        nft.buyAndStake{value: 10}(MOCK_TOKEN_ID);
+        vm.stopPrank();
+    }
+
+    function testCannotBuyAndStakeIfTokenIdOverMaxSupply() public {
+        vm.startPrank(user);
+        vm.expectRevert();
+        nft.buyAndStake{value: 100}(MAX_SUPPLY + 1);
+        vm.stopPrank();
+    }
+
+    function testCannotBuyWithDiscountAndStakeIfNotEnoughMoney() public {
+        vm.startPrank(user1);
+        proof[0] = leafs[1];
+        proof[1] = layer2[1];
+        vm.expectRevert();
+        nft.buyWithDiscountAndStake{value: 10}(MOCK_TOKEN_ID, 1, proof);
+        vm.stopPrank();
+    }
+
+    function testCannotBuyWithDiscountAndStakeIfTokenIdOverMaxSupply() public {
+        vm.startPrank(user1);
+        proof[0] = leafs[1];
+        proof[1] = layer2[1];
+        vm.expectRevert();
+        nft.buyWithDiscountAndStake{value: 20}(MAX_SUPPLY + 1, 1, proof);
+        vm.stopPrank();
+    }
+
     function testCannotBuyWithDiscountAndStakeIfAlreayClaimed() public {
         vm.startPrank(user1);
         proof[0] = leafs[1];
@@ -208,6 +240,26 @@ contract NFTTest is Test {
         nft.buyWithDiscountAndStake{value: 20}(MOCK_TOKEN_ID, 1, proof);
         vm.expectRevert(NFT.NFT__AlreadyClaimed.selector);
         nft.buyWithDiscountAndStake{value: 20}(MOCK_TOKEN_ID, 1, proof);
+        vm.stopPrank();
+    }
+
+    function testCannotBuyWithDiscountAndStakeIfNotInMerkleTree() public {
+        vm.startPrank(user);
+        proof[0] = leafs[1];
+        proof[1] = layer2[1];
+        vm.expectRevert();
+        nft.buyWithDiscountAndStake{value: 20}(MOCK_TOKEN_ID, 2, proof);
+        vm.stopPrank();
+    }
+
+    function testCannotBuyWithDiscountAndStakeIfIndexTooLarge() public {
+        vm.startPrank(user1);
+        proof[0] = leafs[1];
+        proof[1] = layer2[1];
+        nft.buyWithDiscountAndStake{value: 20}(MOCK_TOKEN_ID, 1, proof);
+        vm.expectRevert();
+        nft.buyWithDiscountAndStake{value: 20}(MOCK_TOKEN_ID + 1, 4, proof);
+        assertEq(nft.balanceOf(user1), 0);
         vm.stopPrank();
     }
 

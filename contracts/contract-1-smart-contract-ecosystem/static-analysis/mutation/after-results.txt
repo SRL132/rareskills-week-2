@@ -64,7 +64,7 @@ Mutation:
              function setStakingHandler(address _stakingHandler) external  {
 #################################################
 
-#### 4-Helped me find what was missing in the test line coverage 
+#### 4-Helped me find what was missing in the test line coverage, accelerating the process considerably 
 
 Mutation:
     File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol

@@ -44,6 +44,13 @@ contract StakingHandlerTest is Test {
         assertEq(nft.balanceOf(owner), 0);
     }
 
+    function testRevertsIfNotOwnerSetsStakingHandler() public {
+        vm.startPrank(user);
+        vm.expectRevert();
+        nft.setStakingHandler(address(stakingHandler));
+        vm.stopPrank();
+    }
+
     //MINT
     function testCanReceiveNFT() public {
         vm.startPrank(user);
