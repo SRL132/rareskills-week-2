@@ -1,0 +1,577 @@
+Mutation testing report:
+Number of mutations:    52
+Killed:                 41 / 52
+
+Mutations:
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/RewardToken.sol
+    Line nr: 27
+    Result: Killed
+    Original line:
+                 if (msg.sender != s_stakingHandler) {
+
+    Mutated line:
+                 if (msg.sender == s_stakingHandler) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/RewardToken.sol
+    Line nr: 37
+    Result: Killed
+    Original line:
+                 if (msg.sender != i_owner) {
+
+    Mutated line:
+                 if (msg.sender == i_owner) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/RewardToken.sol
+    Line nr: 30
+    Result: Killed
+    Original line:
+                 _mint(_to, _amount);
+
+    Mutated line:
+                 
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/RewardToken.sol
+    Line nr: 18
+    Result: Error
+    Original line:
+             constructor() ERC20("RewardToken", "RT") {
+
+    Mutated line:
+             constructor()  {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 61
+    Result: Killed
+    Original line:
+                 if (msg.value < _price) {
+
+    Mutated line:
+                 if (msg.value <= _price) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 69
+    Result: Lived
+    Original line:
+                 if (_index > PROMISED_AMOUNT) {
+
+    Mutated line:
+                 if (_index >= PROMISED_AMOUNT) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 57
+    Result: Killed
+    Original line:
+                 if (_tokenId >= MAX_SUPPLY) {
+
+    Mutated line:
+                 if (_tokenId < MAX_SUPPLY) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 61
+    Result: Killed
+    Original line:
+                 if (msg.value < _price) {
+
+    Mutated line:
+                 if (msg.value >= _price) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 69
+    Result: Killed
+    Original line:
+                 if (_index > PROMISED_AMOUNT) {
+
+    Mutated line:
+                 if (_index <= PROMISED_AMOUNT) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 94
+    Result: Killed
+    Original line:
+                 _setDefaultRoyalty(_artist, ROYALTY_REWARD_RATE);
+
+    Mutated line:
+                 
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 113
+    Result: Killed
+    Original line:
+                 _safeMint(msg.sender, _tokenId);
+
+    Mutated line:
+                 
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 141
+    Result: Killed
+    Original line:
+                 _safeMint(msg.sender, _tokenId);
+
+    Mutated line:
+                 
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 151
+    Result: Killed
+    Original line:
+                 _mint(address(this), _tokenId);
+
+    Mutated line:
+                 
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 152
+    Result: Killed
+    Original line:
+                 _safeTransfer(address(this), address(s_stakingHandler), _tokenId);
+
+    Mutated line:
+                 
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 180
+    Result: Killed
+    Original line:
+                 _mint(address(this), _tokenId);
+
+    Mutated line:
+                 
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 181
+    Result: Killed
+    Original line:
+                 _safeTransfer(address(this), address(s_stakingHandler), _tokenId);
+
+    Mutated line:
+                 
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 93
+    Result: Error
+    Original line:
+             ) ERC721("MerkleNFT", "MNFT") Ownable(msg.sender) {
+
+    Mutated line:
+             )  Ownable(msg.sender) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 93
+    Result: Error
+    Original line:
+             ) ERC721("MerkleNFT", "MNFT") Ownable(msg.sender) {
+
+    Mutated line:
+             ) ERC721("MerkleNFT", "MNFT")  {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 103
+    Result: Lived
+    Original line:
+             function setStakingHandler(address _stakingHandler) external onlyOwner {
+
+    Mutated line:
+             function setStakingHandler(address _stakingHandler) external  {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 112
+    Result: Killed
+    Original line:
+             ) external payable applyBuyChecks(_tokenId, REGULAR_PRICE) {
+
+    Mutated line:
+             ) external payable  {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 130
+    Result: Killed
+    Original line:
+                 applyBuyChecks(_tokenId, REDUCED_PRICE)
+
+    Mutated line:
+                 
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 131
+    Result: Killed
+    Original line:
+                 applyDiscountChecks(_index, _proof)
+
+    Mutated line:
+                 
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 150
+    Result: Lived
+    Original line:
+             ) external payable applyBuyChecks(_tokenId, REGULAR_PRICE) {
+
+    Mutated line:
+             ) external payable  {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 169
+    Result: Lived
+    Original line:
+                 applyBuyChecks(_tokenId, REDUCED_PRICE)
+
+    Mutated line:
+                 
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 170
+    Result: Lived
+    Original line:
+                 applyDiscountChecks(_index, _proof)
+
+    Mutated line:
+                 
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/NFT.sol
+    Line nr: 188
+    Result: Killed
+    Original line:
+             function withdrawFunds() external onlyOwner {
+
+    Mutated line:
+             function withdrawFunds() external  {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 116
+    Result: Killed
+    Original line:
+                 if (s_userToStakedTokens[msg.sender].length == 0) {
+
+    Mutated line:
+                 if (s_userToStakedTokens[msg.sender].length != 0) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 137
+    Result: Killed
+    Original line:
+                 if (amountStaked == 0) {
+
+    Mutated line:
+                 if (amountStaked != 0) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 206
+    Result: Killed
+    Original line:
+                 if (block.number <= s_lastRewardBlock) {
+
+    Mutated line:
+                 if (block.number < s_lastRewardBlock) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 90
+    Result: Killed
+    Original line:
+                 if (msg.sender != i_nft) {
+
+    Mutated line:
+                 if (msg.sender == i_nft) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 116
+    Result: Killed
+    Original line:
+                 if (s_userToStakedTokens[msg.sender].length == 0) {
+
+    Mutated line:
+                 if (s_userToStakedTokens[msg.sender].length != 0) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 137
+    Result: Killed
+    Original line:
+                 if (amountStaked == 0) {
+
+    Mutated line:
+                 if (amountStaked != 0) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 141
+    Result: Killed
+    Original line:
+                 if (s_tokenToStaker[_tokenId] != msg.sender) {
+
+    Mutated line:
+                 if (s_tokenToStaker[_tokenId] == msg.sender) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 206
+    Result: Killed
+    Original line:
+                 if (block.number <= s_lastRewardBlock) {
+
+    Mutated line:
+                 if (block.number > s_lastRewardBlock) {
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 103
+    Result: Killed
+    Original line:
+                     s_userToStakedTokens[_operator].length -
+
+    Mutated line:
+                     s_userToStakedTokens[_operator].length + 1;
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 122
+    Result: Killed
+    Original line:
+                     stakedTokens -
+
+    Mutated line:
+                     stakedTokens + s_userToAccumulatedRewardDebt[msg.sender];
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 121
+    Result: Killed
+    Original line:
+                 uint256 withdrawableAmount = s_accRewardPerToken *
+
+    Mutated line:
+                 uint256 withdrawableAmount = s_accRewardPerToken / stakedTokens -
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 147
+    Result: Lived
+    Original line:
+                 uint256 amountRewardForOneToken = s_accRewardPerToken -
+
+    Mutated line:
+                 uint256 amountRewardForOneToken = s_accRewardPerToken + (s_userToAccumulatedRewardDebt[msg.sender] / amountStaked);
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 148
+    Result: Lived
+    Original line:
+                     (s_userToAccumulatedRewardDebt[msg.sender] / amountStaked);
+
+    Mutated line:
+                     (s_userToAccumulatedRewardDebt[msg.sender] * amountStaked);
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 154
+    Result: Killed
+    Original line:
+                 uint256 lastToken = s_allStakedTokens[s_allStakedTokens.length - 1];
+
+    Mutated line:
+                 uint256 lastToken = s_allStakedTokens[s_allStakedTokens.length + 1];
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 167
+    Result: Killed
+    Original line:
+                     amountStaked - 1
+
+    Mutated line:
+                     amountStaked + 1
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 217
+    Result: Killed
+    Original line:
+                 uint256 elapsedBlocks = block.number - s_lastRewardBlock;
+
+    Mutated line:
+                 uint256 elapsedBlocks = block.number + s_lastRewardBlock;
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 218
+    Result: Killed
+    Original line:
+                 uint256 totalReward = elapsedBlocks * STAKING_REWARD;
+
+    Mutated line:
+                 uint256 totalReward = elapsedBlocks / STAKING_REWARD;
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 220
+    Result: Killed
+    Original line:
+                 uint256 rewardToMint = (totalReward * REWARD_TOKEN_PRECISION) /
+
+    Mutated line:
+                 uint256 rewardToMint = (totalReward * REWARD_TOKEN_PRECISION) * BLOCKS_IN_A_DAY;
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 220
+    Result: Killed
+    Original line:
+                 uint256 rewardToMint = (totalReward * REWARD_TOKEN_PRECISION) /
+
+    Mutated line:
+                 uint256 rewardToMint = (totalReward / REWARD_TOKEN_PRECISION) /
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 227
+    Result: Killed
+    Original line:
+                 s_accRewardPerToken += (rewardToMint / tokenSupplyStaked);
+
+    Mutated line:
+                 s_accRewardPerToken += (rewardToMint * tokenSupplyStaked);
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 106
+    Result: Killed
+    Original line:
+                 s_userToAccumulatedRewardDebt[_operator] += s_accRewardPerToken;
+
+    Mutated line:
+                 s_userToAccumulatedRewardDebt[_operator] -= s_accRewardPerToken;
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 125
+    Result: Killed
+    Original line:
+                 s_userToAccumulatedRewardDebt[msg.sender] += withdrawableAmount;
+
+    Mutated line:
+                 s_userToAccumulatedRewardDebt[msg.sender] -= withdrawableAmount;
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 150
+    Result: Lived
+    Original line:
+                 s_userToAccumulatedRewardDebt[msg.sender] += amountRewardForOneToken;
+
+    Mutated line:
+                 s_userToAccumulatedRewardDebt[msg.sender] -= amountRewardForOneToken;
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 227
+    Result: Killed
+    Original line:
+                 s_accRewardPerToken += (rewardToMint / tokenSupplyStaked);
+
+    Mutated line:
+                 s_accRewardPerToken -= (rewardToMint / tokenSupplyStaked);
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 94
+    Result: Killed
+    Original line:
+                 _updateRewards(true);
+
+    Mutated line:
+                 
+
+
+Mutation:
+    File: /Users/sergirocalaguna/Desktop/dev/rareskills-week-2/contracts/contract-1-smart-contract-ecosystem/src/StakingHandler.sol
+    Line nr: 115
+    Result: Killed
+    Original line:
+                 _updateRewards(false);
+
+    Mutated line:
+                 
+
+

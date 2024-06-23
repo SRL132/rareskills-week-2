@@ -285,4 +285,9 @@ contract NFTTest is Test {
     function testSupportsInterface() public view {
         assert(nft.supportsInterface(0x80ac58cd));
     }
+
+    function testCanDeployNft() public {
+        NFT nft = new NFT(root, artist);
+        assertEq(nft.owner(), address(this));
+    }
 }
