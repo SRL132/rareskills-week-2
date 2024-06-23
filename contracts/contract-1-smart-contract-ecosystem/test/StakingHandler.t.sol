@@ -46,7 +46,7 @@ contract StakingHandlerTest is Test {
         vm.stopPrank();
         assertEq(nft.balanceOf(user), 0);
     }
-
+    //WITHDRAW
     function testCanWithdrawStakingRewards() public {
         vm.startPrank(user);
         nft.buy{value: 100}(0);
@@ -57,6 +57,13 @@ contract StakingHandlerTest is Test {
         assertEq(rewardToken.balanceOf(user), 10 * REWARD_TOKEN_PRECISION);
     }
 
+    function testRevertsIfWithdrawWithNoTokensTaked() public {
+        vm.startPrank(user);
+        vm.expectRevert();
+        stakingHandler.withdrawStakingRewards();
+        vm.stopPrank();
+    }
+
     function testCanWithdrawNFT() public {
         vm.startPrank(user);
         nft.buy{value: 100}(0);
@@ -64,6 +71,13 @@ contract StakingHandlerTest is Test {
         stakingHandler.withdrawNFT(0);
         vm.stopPrank();
         assertEq(nft.balanceOf(user), 1);
+    }
+
+    function testRevertsIfWithdrawWithouthavingStakedNFT() public {
+        vm.startPrank(user);
+        vm.expectRevert();
+        stakingHandler.withdrawNFT(0);
+        vm.stopPrank();
     }
 
     function testCannotWithdrawNFTIfNotStaker() public {
@@ -187,5 +201,25 @@ contract StakingHandlerTest is Test {
         stakingHandler.withdrawStakingRewards();
         assertEq(rewardToken.balanceOf(user), 20 * REWARD_TOKEN_PRECISION);
         vm.stopPrank();
+    }
+
+    function testOnERC721ReceivedRevertsIfNotNFT() public {
+        vm.startPrank(user);
+        nft.buy{value: 100}(0);
+        vm.stopPrank();
+        vm.startPrank(owner);
+        vm.expectRevert();
+        stakingHandler.onERC721Received(owner, owner, 0, "0x0");
+        vm.stopPrank();
+    }
+
+    function testCanDeployStakingHandler() public {
+        vm.startPrank(owner);
+        StakingHandler testStakingHandler = new StakingHandler(
+            address(nft),
+            address(rewardToken)
+        );
+        vm.stopPrank();
+        assertEq(rewardToken.totalSupply(), 0);
     }
 }

@@ -119,6 +119,20 @@ contract NFTTest is Test {
         vm.stopPrank();
     }
 
+    function testCannotBuyTokenIdOverMaxSupply() public {
+        vm.startPrank(user1);
+        vm.expectRevert();
+        nft.buy{value: 100}(MAX_SUPPLY);
+        vm.stopPrank();
+    }
+
+    function testCannotBuyIfValueBelowPrice() public {
+        vm.startPrank(user1);
+        vm.expectRevert();
+        nft.buy{value: 10}(MOCK_TOKEN_ID);
+        vm.stopPrank();
+    }
+
     function testCannotBuyWithDiscountIfIndexTooLarge() public {
         vm.startPrank(user1);
         proof[0] = leafs[1];
@@ -157,6 +171,16 @@ contract NFTTest is Test {
         assertEq(nft.balanceOf(user1), 0);
         uint256[] memory stakedTokens = stakingHandler.getStakedTokens(user1);
         assertEq(stakedTokens.length, 1);
+        vm.stopPrank();
+    }
+
+    function testCannotBuyWithDiscountAndStakeIfAlreayClaimed() public {
+        vm.startPrank(user1);
+        proof[0] = leafs[1];
+        proof[1] = layer2[1];
+        nft.buyWithDiscountAndStake{value: 20}(MOCK_TOKEN_ID, 1, proof);
+        vm.expectRevert();
+        nft.buyWithDiscountAndStake{value: 20}(MOCK_TOKEN_ID, 1, proof);
         vm.stopPrank();
     }
 
@@ -205,5 +229,22 @@ contract NFTTest is Test {
         );
         assertEq(receiver, artist);
         assertEq(royalty, EXPECTED_ROYALTY);
+    }
+    //VIEW
+    function testIsClaimed() public {
+        vm.startPrank(user1);
+        proof[0] = leafs[1];
+        proof[1] = layer2[1];
+        nft.buyWithDiscount{value: 20}(MOCK_TOKEN_ID, 1, proof);
+        assert(
+            nft.isClaimed(
+                uint256(keccak256(abi.encodePacked(user1, uint256(1))))
+            )
+        );
+        vm.stopPrank();
+    }
+
+    function testSupportsInterface() public view {
+        assert(nft.supportsInterface(0x80ac58cd));
     }
 }

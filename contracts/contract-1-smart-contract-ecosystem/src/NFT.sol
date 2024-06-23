@@ -36,9 +36,6 @@ contract NFT is ERC721, ERC2981, Ownable2Step {
     //BITMAP
     BitMaps.BitMap private s_claimedBitMap;
 
-    //OWNER
-    address s_pendingOwner;
-
     //EVENTS
     event BoughtWithDiscount(
         address indexed user,
@@ -63,14 +60,6 @@ contract NFT is ERC721, ERC2981, Ownable2Step {
     event Bought(address indexed user, uint256 indexed index, uint256 amount);
 
     //FUNCTIONS
-    modifier onlyPendingOwner() {
-        address sender = _msgSender();
-        if (s_pendingOwner != sender) {
-            revert OwnableUnauthorizedAccount(sender);
-        }
-        _;
-    }
-
     modifier applyBuyChecks(uint256 _tokenId, uint256 _price) {
         if (_tokenId >= MAX_SUPPLY) {
             revert NFT__AmountOverMaximum();
@@ -207,10 +196,6 @@ contract NFT is ERC721, ERC2981, Ownable2Step {
         (bool success, ) = payable(msg.sender).call{
             value: address(this).balance
         }("");
-
-        if (!success) {
-            revert NFT__WithdrawFailed();
-        }
     }
 
     //PUBLIC
