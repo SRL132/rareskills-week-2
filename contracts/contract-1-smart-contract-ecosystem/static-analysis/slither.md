@@ -28,74 +28,8 @@ Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-
 
 
 ## REVISING
-INFO:Detectors:
-NFT.setStakingHandler(address)._stakingHandler (src/NFT.sol#104) lacks a zero-check on :
-                - s_stakingHandler = _stakingHandler (src/NFT.sol#105)
-RewardToken.setStakingHandler(address)._stakingHandler (src/RewardToken.sol#37) lacks a zero-check on :
-                - s_stakingHandler = _stakingHandler (src/RewardToken.sol#41)
-Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
 
-INFO:Detectors:
-Reentrancy in StakingHandler.onERC721Received(address,address,uint256,bytes) (src/StakingHandler.sol#85-111):
-        External calls:
-        - _updateRewards(true) (src/StakingHandler.sol#95)
-                - IRewardToken(i_rewardToken).mint(address(this),rewardToMint) (src/StakingHandler.sol#230)
-        State variables written after the call(s):
-        - s_allStakedTokens.push(_tokenId) (src/StakingHandler.sol#102)
-        - s_allStakedTokensIndex[_tokenId] = s_allStakedTokens.length (src/StakingHandler.sol#101)
-        - s_ownedStakedTokensIndex[_tokenId] = s_userToStakedTokens[_operator].length - 1 (src/StakingHandler.sol#103-105)
-        - s_tokenToStaker[_tokenId] = _operator (src/StakingHandler.sol#97)
-        - s_userToAccumulatedRewardDebt[_operator] += s_accRewardPerToken (src/StakingHandler.sol#107)
-        - s_userToStakedTokens[_operator].push(_tokenId) (src/StakingHandler.sol#99)
 
-INFO:Detectors:
-Reentrancy in NFT.buy(uint256) (src/NFT.sol#111-117):
-        External calls:
-        - _safeMint(msg.sender,_tokenId) (src/NFT.sol#114)
-                - IERC721Receiver(to).onERC721Received(_msgSender(),from,tokenId,data) (lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol#467-480)
-        Event emitted after the call(s):
-        - Bought(msg.sender,_tokenId,msg.value) (src/NFT.sol#116)
-Reentrancy in NFT.buyAndStake(uint256) (src/NFT.sol#149-156):
-        External calls:
-        - _safeTransfer(address(this),address(s_stakingHandler),_tokenId) (src/NFT.sol#153)
-                - IERC721Receiver(to).onERC721Received(_msgSender(),from,tokenId,data) (lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol#467-480)
-        Event emitted after the call(s):
-        - BoughtAndStaked(msg.sender,_tokenId,msg.value) (src/NFT.sol#155)
-Reentrancy in NFT.buyWithDiscount(uint256,uint256,bytes32[]) (src/NFT.sol#124-144):
-        External calls:
-        - _safeMint(msg.sender,_tokenId) (src/NFT.sol#142)
-                - IERC721Receiver(to).onERC721Received(_msgSender(),from,tokenId,data) (lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol#467-480)
-        Event emitted after the call(s):
-        - BoughtWithDiscount(msg.sender,_tokenId,msg.value) (src/NFT.sol#143)
-Reentrancy in NFT.buyWithDiscountAndStake(uint256,uint256,bytes32[]) (src/NFT.sol#163-185):
-        External calls:
-        - _safeTransfer(address(this),address(s_stakingHandler),_tokenId) (src/NFT.sol#182)
-                - IERC721Receiver(to).onERC721Received(_msgSender(),from,tokenId,data) (lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol#467-480)
-        Event emitted after the call(s):
-        - BoughtAndStaked(msg.sender,_tokenId,msg.value) (src/NFT.sol#184)
-Reentrancy in StakingHandler.onERC721Received(address,address,uint256,bytes) (src/StakingHandler.sol#85-111):
-        External calls:
-        - _updateRewards(true) (src/StakingHandler.sol#95)
-                - IRewardToken(i_rewardToken).mint(address(this),rewardToMint) (src/StakingHandler.sol#230)
-        Event emitted after the call(s):
-        - NFTStaked(_operator,_tokenId,block.number) (src/StakingHandler.sol#109)
-Reentrancy in StakingHandler.withdrawNFT(uint256) (src/StakingHandler.sol#135-188):
-        External calls:
-        - IERC20(i_rewardToken).safeTransfer(msg.sender,amountRewardForOneToken) (src/StakingHandler.sol#183)
-        - IERC721(i_nft).safeTransferFrom(address(this),msg.sender,_tokenId) (src/StakingHandler.sol#185)
-        Event emitted after the call(s):
-        - NFTWithdrawn(msg.sender,_tokenId,block.number) (src/StakingHandler.sol#187)
-Reentrancy in StakingHandler.withdrawStakingRewards() (src/StakingHandler.sol#115-131):
-        External calls:
-        - _updateRewards(false) (src/StakingHandler.sol#116)
-                - IRewardToken(i_rewardToken).mint(address(this),rewardToMint) (src/StakingHandler.sol#230)
-        - IERC20(i_rewardToken).safeTransfer(msg.sender,withdrawableAmount) (src/StakingHandler.sol#128)
-        Event emitted after the call(s):
-        - StakingWithdrawn(msg.sender,withdrawableAmount,block.number) (src/StakingHandler.sol#130)
-Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
-
-INFO:Detectors:
-Pragma version0.8.24 (src/NFT.sol#2) necessitates a version too recent to be trusted. Consider deploying with 0.8.18.
 
 INFO:Detectors:
 Low level call in NFT.withdrawFunds() (src/NFT.sol#189-195):
@@ -105,9 +39,6 @@ Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-lev
 INFO:Detectors:
 RewardToken (src/RewardToken.sol#10-49) should inherit from IRewardToken (src/interfaces/IRewardToken.sol#4-8)
 Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-inheritance
-
-INFO:Detectors:
-RewardToken._decimals (src/RewardToken.sol#16) should be constant 
 
 ## FALSE POSITIVES
 INFO:Detectors:
@@ -144,3 +75,49 @@ Variable StakingHandler.s_allStakedTokens (src/StakingHandler.sol#40) is not in 
 Variable StakingHandler.s_ownedStakedTokensIndex (src/StakingHandler.sol#42) is not in mixedCase
 Variable StakingHandler.s_userToAccumulatedRewardDebt (src/StakingHandler.sol#44) is not in mixedCase
 Variable StakingHandler.s_tokenToStaker (src/StakingHandler.sol#46) is not in mixedCase
+
+INFO:Detectors:
+NFT.setStakingHandler(address)._stakingHandler (src/NFT.sol#104) lacks a zero-check on :
+                - s_stakingHandler = _stakingHandler (src/NFT.sol#105)
+RewardToken.setStakingHandler(address)._stakingHandler (src/RewardToken.sol#37) lacks a zero-check on :
+                - s_stakingHandler = _stakingHandler (src/RewardToken.sol#41)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+
+INFO:Detectors:
+Reentrancy in StakingHandler.onERC721Received(address,address,uint256,bytes) (src/StakingHandler.sol#85-111):
+        External calls:
+        - _updateRewards(true) (src/StakingHandler.sol#95)
+                - IRewardToken(i_rewardToken).mint(address(this),rewardToMint) (src/StakingHandler.sol#230)
+        State variables written after the call(s):
+        - s_allStakedTokens.push(_tokenId) (src/StakingHandler.sol#102)
+        - s_allStakedTokensIndex[_tokenId] = s_allStakedTokens.length (src/StakingHandler.sol#101)
+        - s_ownedStakedTokensIndex[_tokenId] = s_userToStakedTokens[_operator].length - 1 (src/StakingHandler.sol#103-105)
+        - s_tokenToStaker[_tokenId] = _operator (src/StakingHandler.sol#97)
+        - s_userToAccumulatedRewardDebt[_operator] += s_accRewardPerToken (src/StakingHandler.sol#107)
+        - s_userToStakedTokens[_operator].push(_tokenId) (src/StakingHandler.sol#99)
+  
+  INFO:Detectors:
+Reentrancy in NFT.buy(uint256) (src/NFT.sol#111-117):
+        External calls:
+        - _safeMint(msg.sender,_tokenId) (src/NFT.sol#114)
+                - IERC721Receiver(to).onERC721Received(_msgSender(),from,tokenId,data) (lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol#467-480)
+        Event emitted after the call(s):
+        - Bought(msg.sender,_tokenId,msg.value) (src/NFT.sol#116)
+Reentrancy in NFT.buyAndStake(uint256) (src/NFT.sol#149-156):
+        External calls:
+        - _safeTransfer(address(this),address(s_stakingHandler),_tokenId) (src/NFT.sol#153)
+                - IERC721Receiver(to).onERC721Received(_msgSender(),from,tokenId,data) (lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol#467-480)
+        Event emitted after the call(s):
+        - BoughtAndStaked(msg.sender,_tokenId,msg.value) (src/NFT.sol#155)
+Reentrancy in NFT.buyWithDiscount(uint256,uint256,bytes32[]) (src/NFT.sol#124-144):
+        External calls:
+        - _safeMint(msg.sender,_tokenId) (src/NFT.sol#142)
+                - IERC721Receiver(to).onERC721Received(_msgSender(),from,tokenId,data) (lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol#467-480)
+        Event emitted after the call(s):
+        - BoughtWithDiscount(msg.sender,_tokenId,msg.value) (src/NFT.sol#143)
+Reentrancy in NFT.buyWithDiscountAndStake(uint256,uint256,bytes32[]) (src/NFT.sol#163-185):
+        External calls:
+        - _safeTransfer(address(this),address(s_stakingHandler),_tokenId) (src/NFT.sol#182)
+                - IERC721Receiver(to).onERC721Received(_msgSender(),from,tokenId,data) (lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol#467-480)
+        Event emitted after the call(s):
+        - BoughtAndStaked(msg.sender,_tokenId,msg.value) (src/NFT.sol#184)
