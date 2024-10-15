@@ -70,7 +70,7 @@ contract StakingHandlerTest is Test {
         assertEq(rewardToken.balanceOf(user), 10 * REWARD_TOKEN_PRECISION);
     }
 
-    function testRevertsIfWithdrawWithNoTokensTaked() public {
+    function testRevertsIfWithdrawWithNoTokensStaked() public {
         vm.startPrank(user);
         vm.expectRevert();
         stakingHandler.withdrawStakingRewards();
